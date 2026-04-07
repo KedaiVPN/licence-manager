@@ -304,14 +304,13 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Auth Key</label>
+                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Auth Key <span className="text-gray-500 lowercase">(optional)</span></label>
                       <input
                         type="text"
                         value={formData.auth_key}
                         onChange={(e) => setFormData({...formData, auth_key: e.target.value})}
                         className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        placeholder="Secret123"
-                        required
+                        placeholder="Leave blank for new installs"
                       />
                     </div>
                     <div>
