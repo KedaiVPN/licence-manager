@@ -6,8 +6,7 @@ import crypto from "crypto";
 // GET all licenses
 export async function GET() {
   try {
-    // We intentionally omit auth_key from the payload for security reasons
-    const result = await db.execute("SELECT ip_address, client_name, expired_date, status FROM licenses ORDER BY client_name ASC");
+    const result = await db.execute("SELECT * FROM licenses ORDER BY client_name ASC");
     return NextResponse.json({ licenses: result.rows });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch licenses" }, { status: 500 });
@@ -17,13 +16,11 @@ export async function GET() {
 // POST new license
 export async function POST(request: Request) {
   try {
-    const { ip_address, client_name, expired_date } = await request.json();
+    const { ip_address, client_name, expired_date, auth_key } = await request.json();
 
-    if (!ip_address || !client_name || !expired_date) {
+    if (!ip_address || !client_name || !expired_date || !auth_key) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
-
-    const auth_key = crypto.randomBytes(16).toString("hex");
 
     await db.execute({
       sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key) VALUES (?, ?, ?, ?, ?)",
@@ -50,7 +47,7 @@ export async function POST(request: Request) {
 // PUT update license
 export async function PUT(request: Request) {
   try {
-    const { ip_address, client_name, expired_date, status } = await request.json();
+    const { ip_address, client_name, expired_date, status, auth_key } = await request.json();
 
     if (!ip_address) {
       return NextResponse.json({ error: "IP address is required" }, { status: 400 });
@@ -70,6 +67,10 @@ export async function PUT(request: Request) {
     if (status !== undefined) {
       updates.push("status = ?");
       args.push(status);
+    }
+    if (auth_key !== undefined) {
+      updates.push("auth_key = ?");
+      args.push(auth_key);
     }
 
     if (updates.length === 0) {

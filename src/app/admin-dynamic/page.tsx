@@ -38,6 +38,7 @@ export default function AdminDashboard() {
     client_name: "",
     expired_date: "",
     status: "active" as "active" | "banned",
+    auth_key: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState("");
@@ -132,6 +133,7 @@ export default function AdminDashboard() {
       client_name: license.client_name,
       expired_date: license.expired_date,
       status: license.status,
+      auth_key: license.auth_key || "",
     });
     setIsEditing(true);
     setShowForm(true);
@@ -144,6 +146,7 @@ export default function AdminDashboard() {
       client_name: "",
       expired_date: "",
       status: "active",
+      auth_key: "",
     });
     setIsEditing(false);
     setFormError("");
@@ -297,6 +300,17 @@ export default function AdminDashboard() {
                         value={formData.expired_date}
                         onChange={(e) => setFormData({...formData, expired_date: e.target.value})}
                         className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Auth Key</label>
+                      <input
+                        type="text"
+                        value={formData.auth_key}
+                        onChange={(e) => setFormData({...formData, auth_key: e.target.value})}
+                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                        placeholder="Secret123"
                         required
                       />
                     </div>
