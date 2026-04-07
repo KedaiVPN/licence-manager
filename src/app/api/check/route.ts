@@ -34,20 +34,25 @@ export async function GET(request: Request) {
 
     if (result.rows.length === 0) {
       return NextResponse.json({
-        action: "delete",
-        status: "banned",
-        expired_date: "2000-01-01",
+        valid: false,
         message: "License not found"
       });
     }
 
     const license = result.rows[0];
 
+    // If the license is found but status is banned, we also consider it invalid
+    if (license.status === "banned") {
+      return NextResponse.json({
+        valid: false,
+        message: "License is banned"
+      });
+    }
+
     return NextResponse.json({
-      action: "update",
+      valid: true,
       client_name: license.client_name,
       expired_date: license.expired_date,
-      status: license.status,
     });
   } catch (error) {
     console.error("Error checking license:", error);
