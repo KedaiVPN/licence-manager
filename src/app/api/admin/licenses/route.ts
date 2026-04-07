@@ -1,0 +1,159 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { sendWebhook } from "@/lib/webhook";
+import crypto from "crypto";
+
+// GET all licenses
+export async function GET() {
+  try {
+    // We intentionally omit auth_key from the payload for security reasons
+    const result = await db.execute("SELECT ip_address, client_name, expired_date, status FROM licenses ORDER BY client_name ASC");
+    return NextResponse.json({ licenses: result.rows });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch licenses" }, { status: 500 });
+  }
+}
+
+// POST new license
+export async function POST(request: Request) {
+  try {
+    const { ip_address, client_name, expired_date } = await request.json();
+
+    if (!ip_address || !client_name || !expired_date) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const auth_key = crypto.randomBytes(16).toString("hex");
+
+    await db.execute({
+      sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key) VALUES (?, ?, ?, ?, ?)",
+      args: [ip_address, client_name, expired_date, "active", auth_key],
+    });
+
+    // Await webhook to prevent serverless termination
+    await sendWebhook(ip_address, auth_key, {
+      action: "update",
+      client_name,
+      expired_date,
+      status: "active",
+    });
+
+    return NextResponse.json({ success: true, message: "License created successfully" });
+  } catch (error: any) {
+    if (error.message?.includes("UNIQUE constraint failed")) {
+      return NextResponse.json({ error: "IP address already registered" }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Failed to create license" }, { status: 500 });
+  }
+}
+
+// PUT update license
+export async function PUT(request: Request) {
+  try {
+    const { ip_address, client_name, expired_date, status } = await request.json();
+
+    if (!ip_address) {
+      return NextResponse.json({ error: "IP address is required" }, { status: 400 });
+    }
+
+    const updates = [];
+    const args: string[] = [];
+
+    if (client_name !== undefined) {
+      updates.push("client_name = ?");
+      args.push(client_name);
+    }
+    if (expired_date !== undefined) {
+      updates.push("expired_date = ?");
+      args.push(expired_date);
+    }
+    if (status !== undefined) {
+      updates.push("status = ?");
+      args.push(status);
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    args.push(ip_address);
+
+    const sql = "UPDATE licenses SET " + updates.join(", ") + " WHERE ip_address = ?";
+    await db.execute({
+      sql,
+      args,
+    });
+
+    // Fetch the updated license to get the auth_key
+    const result = await db.execute({
+      sql: "SELECT * FROM licenses WHERE ip_address = ?",
+      args: [ip_address],
+    });
+
+    if (result.rows.length > 0) {
+      const license = result.rows[0];
+
+      // Await webhook to prevent serverless termination
+      await sendWebhook(
+        license.ip_address as string,
+        license.auth_key as string,
+        {
+          action: "update",
+          client_name: license.client_name as string,
+          expired_date: license.expired_date as string,
+          status: license.status as "active" | "banned",
+        }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "License updated successfully" });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to update license" }, { status: 500 });
+  }
+}
+
+// DELETE license
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const ip_address = searchParams.get("ip");
+
+    if (!ip_address) {
+      return NextResponse.json({ error: "IP address is required" }, { status: 400 });
+    }
+
+    // Fetch before deleting to get auth_key and details for webhook
+    const result = await db.execute({
+      sql: "SELECT * FROM licenses WHERE ip_address = ?",
+      args: [ip_address],
+    });
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: "License not found" }, { status: 404 });
+    }
+
+    const license = result.rows[0];
+
+    // Await webhook to prevent serverless termination (it will send expired_date in the past)
+    await sendWebhook(
+      license.ip_address as string,
+      license.auth_key as string,
+      {
+        action: "delete",
+        client_name: license.client_name as string,
+        expired_date: license.expired_date as string,
+        status: license.status as "active" | "banned",
+      }
+    );
+
+    // Now delete from database
+    await db.execute({
+      sql: "DELETE FROM licenses WHERE ip_address = ?",
+      args: [ip_address],
+    });
+
+    return NextResponse.json({ success: true, message: "License deleted successfully" });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete license" }, { status: 500 });
+  }
+}
