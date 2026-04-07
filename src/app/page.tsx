@@ -37,7 +37,7 @@ export default async function Home() {
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Header */}
         <header className="border-b border-cyan-900/50 bg-black/80 backdrop-blur-md sticky top-0">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-center md:justify-start items-center">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-start items-center">
             <h1 className="text-3xl font-black tracking-tighter">
               <span className="text-cyan-400">DYNAMIC</span>
               <span className="text-pink-500">LICENCE</span>
