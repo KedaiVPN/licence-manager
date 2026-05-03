@@ -70,7 +70,14 @@ export async function POST(request: Request) {
 
 👋 Username: <code>${username}</code>
 🆔 ID Anda: <code>${chatId}</code>
-🖥️Total server: <code>${serverCount}</code>`;
+🖥️Total server: <code>${serverCount}</code>
+ ┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
+Halo <code>{username}</code>! 👋
+Anda terhubung dengan Sistem Manajemen Lisensi Kedai SSH.
+Sistem kami saat ini sedang menjaga dan mengelola <code>{serverCount}</code> SERVER aktif.
+┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
+🛒 Butuh layanan VPN premium yang handal? 
+🌐 Kunjungi website kami: https://kedaissh.com`;       
 
         // If user is unregistered (not admin and not in DB), append promotional text
         if (chatId !== ADMIN_TELE_ID && !isRegisteredUser) {
