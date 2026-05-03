@@ -70,14 +70,7 @@ export async function POST(request: Request) {
 
 👋 Username: <code>${username}</code>
 🆔 ID Anda: <code>${chatId}</code>
-🖥️Total server: <code>${serverCount}</code>
- ┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
-Halo <code>{username}</code>! 👋
-Anda terhubung dengan Sistem Manajemen Lisensi Kedai SSH.
-Sistem kami saat ini sedang menjaga dan mengelola <code>{serverCount}</code> SERVER aktif.
-┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
-🛒 Butuh layanan VPN premium yang handal? 
-🌐 Kunjungi website kami: https://kedaissh.com`;       
+🖥️Total server: <code>${serverCount}</code>`;
 
         // If user is unregistered (not admin and not in DB), append promotional text
         if (chatId !== ADMIN_TELE_ID && !isRegisteredUser) {
@@ -86,14 +79,15 @@ Halo <code>${username}</code>! 👋
 Anda terhubung dengan Sistem Manajemen Lisensi Kedai SSH.
 Sistem kami saat ini sedang menjaga dan mengelola <code>${serverCount}</code> SERVER aktif.
 ┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
-🛒 Butuh layanan VPN premium yang handal?
-🌐 Kunjungi website kami: https://kedaissh.com`;
+🛒 Butuh VPN premium yang handal?
+🌐 Kunjungi website: https://kedaissh.com
+┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅`;
         } else {
           // Additional text for admin or registered user
           responseText += `\n┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
 Halo <code>${username}</code>! 👋
 Sistem Lisensi Kedai SSH terpantau stabil 🚀
-🌐 Website kami: https://kedaissh.com`;
+🌐 Website: https://kedaissh.com`;
         }
 
         await sendMessage(chatId, responseText);
