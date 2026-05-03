@@ -36,6 +36,7 @@ export async function POST(request: Request) {
 
       if (text === "/start") {
         let serverCount = 0;
+        let isRegisteredUser = false;
 
         // Fetch total licenses depending on user status
         if (chatId === ADMIN_TELE_ID) {
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
           if (userLicenses > 0) {
             // User is registered
             serverCount = userLicenses;
+            isRegisteredUser = true;
           } else {
             // Unregistered user: show active licenses without tele_id
             const result = await db.execute("SELECT COUNT(*) as count FROM licenses WHERE status = 'active' AND (tele_id IS NULL OR tele_id = '')");
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
           }
         }
 
-        const responseText = `█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+        let responseText = `█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
 █░░╦─╦╔╗╦─╔╗╔╗╔╦╗╔╗░░█
 █░░║║║╠─║─║─║║║║║╠─░░█
 █░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█
@@ -76,6 +78,23 @@ Sistem kami saat ini sedang menjaga dan mengelola <code>{serverCount}</code> SER
 ┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
 🛒 Butuh layanan VPN premium yang handal? 
 🌐 Kunjungi website kami: https://kedaissh.com`;       
+
+        // If user is unregistered (not admin and not in DB), append promotional text
+        if (chatId !== ADMIN_TELE_ID && !isRegisteredUser) {
+          responseText += `\n┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
+Halo <code>${username}</code>! 👋
+Anda terhubung dengan Sistem Manajemen Lisensi Kedai SSH.
+Sistem kami saat ini sedang menjaga dan mengelola <code>${serverCount}</code> SERVER aktif.
+┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
+🛒 Butuh layanan VPN premium yang handal?
+🌐 Kunjungi website kami: https://kedaissh.com`;
+        } else {
+          // Additional text for admin or registered user
+          responseText += `\n┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅
+Halo <code>${username}</code>! 👋
+Sistem Lisensi Kedai SSH terpantau stabil 🚀
+🌐 Website kami: https://kedaissh.com`;
+        }
 
         await sendMessage(chatId, responseText);
       }
