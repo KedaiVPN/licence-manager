@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   LogOut, Shield, Server, Edit2, Trash2, Plus,
-  Activity, RefreshCw, AlertTriangle, AlertCircle
+  Activity, RefreshCw, AlertTriangle, AlertCircle, X
 } from "lucide-react";
 
 type License = {
@@ -253,19 +253,27 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white uppercase tracking-wider">Node Management</h2>
                 <button
-                  onClick={() => { resetForm(); setShowForm(!showForm); }}
+                  onClick={() => { resetForm(); setShowForm(true); }}
                   className="bg-cyan-500 text-black px-4 py-2 text-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:bg-cyan-400 transition-colors"
                 >
-                  {showForm ? 'Cancel' : <><Plus className="w-4 h-4" /> Add Node</>}
+                  <Plus className="w-4 h-4" /> Add Node
                 </button>
               </div>
 
-              {/* Form */}
+              {/* Form Modal */}
               {showForm && (
-                <div className="bg-gray-900/50 border border-cyan-500/50 p-6 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                  <h3 className="text-lg font-bold text-cyan-400 mb-4 uppercase tracking-widest border-b border-cyan-900/50 pb-2">
-                    {isEditing ? "Modify Node Settings" : "Initialize New Node"}
-                  </h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                  <div className="bg-gray-900 border border-cyan-500/50 p-6 shadow-[0_0_30px_rgba(6,182,212,0.2)] w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+                    <button
+                      onClick={() => { setShowForm(false); resetForm(); }}
+                      className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500 transition-colors"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+
+                    <h3 className="text-lg font-bold text-cyan-400 mb-4 uppercase tracking-widest border-b border-cyan-900/50 pb-2 pr-8">
+                      {isEditing ? "Modify Node Settings" : "Initialize New Node"}
+                    </h3>
 
                   {formError && (
                     <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
@@ -349,6 +357,7 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </form>
+                  </div>
                 </div>
               )}
 
