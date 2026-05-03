@@ -13,6 +13,7 @@ type License = {
   expired_date: string;
   status: "active" | "banned";
   auth_key?: string; // Hidden in UI but present in type
+  tele_id?: string | null;
 };
 
 type WebhookLog = {
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
     expired_date: "",
     status: "active" as "active" | "banned",
     auth_key: "",
+    tele_id: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState("");
@@ -134,6 +136,7 @@ export default function AdminDashboard() {
       expired_date: license.expired_date,
       status: license.status,
       auth_key: license.auth_key || "",
+      tele_id: license.tele_id || "",
     });
     setIsEditing(true);
     setShowForm(true);
@@ -147,6 +150,7 @@ export default function AdminDashboard() {
       expired_date: "",
       status: "active",
       auth_key: "",
+      tele_id: "",
     });
     setIsEditing(false);
     setFormError("");
@@ -314,6 +318,16 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
+                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Telegram ID <span className="text-gray-500 lowercase">(optional)</span></label>
+                      <input
+                        type="text"
+                        value={formData.tele_id}
+                        onChange={(e) => setFormData({...formData, tele_id: e.target.value})}
+                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                        placeholder="e.g. 123456789"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Status</label>
                       <select
                         value={formData.status}
@@ -345,6 +359,7 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="p-4">IP Address</th>
                       <th className="p-4">Client Name</th>
+                      <th className="p-4">Tele ID</th>
                       <th className="p-4">Expiration</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Actions</th>
@@ -352,14 +367,15 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-cyan-900/20">
                     {isLoading ? (
-                      <tr><td colSpan={5} className="p-8 text-center text-cyan-800 animate-pulse">Loading node data...</td></tr>
+                      <tr><td colSpan={6} className="p-8 text-center text-cyan-800 animate-pulse">Loading node data...</td></tr>
                     ) : licenses.length === 0 ? (
-                      <tr><td colSpan={5} className="p-8 text-center text-cyan-800">No nodes found in database.</td></tr>
+                      <tr><td colSpan={6} className="p-8 text-center text-cyan-800">No nodes found in database.</td></tr>
                     ) : (
                       licenses.map((license) => (
                         <tr key={license.ip_address} className="hover:bg-cyan-900/10 transition-colors">
                           <td className="p-4 text-cyan-300 font-mono">{license.ip_address}</td>
                           <td className="p-4 text-gray-300">{license.client_name}</td>
+                          <td className="p-4 text-gray-500 font-mono text-xs">{license.tele_id || "-"}</td>
                           <td className="p-4 text-gray-400">{license.expired_date}</td>
                           <td className="p-4">
                             <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${

@@ -44,6 +44,19 @@ ADMIN_PASSWORD=your_secure_password
 
 # Security
 JWT_SECRET=generate_a_random_secure_string
+CRON_SECRET=your_cron_secret
+
+# Telegram Notifications
+BOT_API_KEY=your_telegram_bot_token_here
+ADMIN_TELE_ID=your_admin_telegram_user_id
+```
+
+### Setup Telegram Webhook
+
+To receive `/start` commands from Telegram users, you must register your Vercel deployment URL with Telegram:
+
+```bash
+node scripts/setup-webhook.js <YOUR_BOT_API_KEY> <YOUR_VERCEL_DOMAIN>
 \`\`\`
 
 ### 3. Local Development

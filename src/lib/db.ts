@@ -17,9 +17,27 @@ export async function initDb() {
         client_name TEXT NOT NULL,
         expired_date TEXT NOT NULL,
         status TEXT DEFAULT 'active',
-        auth_key TEXT NOT NULL
+        auth_key TEXT NOT NULL,
+        tele_id TEXT,
+        notif_state TEXT DEFAULT '{}'
       )
     `);
+
+    // Migrate existing table if needed by checking columns
+    try {
+      const result = await db.execute("PRAGMA table_info(licenses)");
+      const columns = result.rows.map((row: any) => row.name);
+
+      if (!columns.includes('tele_id')) {
+        await db.execute("ALTER TABLE licenses ADD COLUMN tele_id TEXT");
+      }
+
+      if (!columns.includes('notif_state')) {
+        await db.execute("ALTER TABLE licenses ADD COLUMN notif_state TEXT DEFAULT '{}'");
+      }
+    } catch (e) {
+      console.error("Failed to migrate licenses table:", e);
+    }
 
     // Create webhook_logs table to store failed webhooks for manual retry
     await db.execute(`
