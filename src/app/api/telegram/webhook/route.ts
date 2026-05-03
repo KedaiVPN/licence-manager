@@ -16,6 +16,7 @@ async function sendMessage(chatId: string | number, text: string) {
       body: JSON.stringify({
         chat_id: chatId,
         text: text,
+        parse_mode: "HTML",
       }),
     });
   } catch (error) {
@@ -65,9 +66,9 @@ export async function POST(request: Request) {
 █░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█
 █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
 
-👋 Username: ${username}
-🆔 ID Anda: ${chatId}
-🖥️Total server: ${serverCount}`;
+👋 Username: <code>${username}</code>
+🆔 ID Anda: <code>${chatId}</code>
+🖥️Total server: <code>${serverCount}</code>`;
 
         await sendMessage(chatId, responseText);
       }
