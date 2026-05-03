@@ -59,6 +59,13 @@ To receive `/start` commands from Telegram users, you must register your Vercel 
 node scripts/setup-webhook.js <YOUR_BOT_API_KEY> <YOUR_VERCEL_DOMAIN>
 \`\`\`
 
+### Setup Hourly Cron Jobs (For Free Vercel Accounts)
+Vercel Hobby (Free) only allows 1 cron execution per day. To make expiration notifications work hourly as intended:
+1. Create a free account at [cron-job.org](https://cron-job.org/).
+2. Create a new cron job targeting `https://your-vercel-domain.com/api/cron/check-expirations`.
+3. If you set `CRON_SECRET` in `.env`, be sure to add an `Authorization` header to the cron-job.org request with the value `Bearer your_cron_secret_here`.
+4. Set the schedule to run every hour.
+
 ### 3. Local Development
 
 1. Install dependencies:
