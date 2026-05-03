@@ -11,7 +11,7 @@ async function sendTelegramMessage(chatId: string | number, text: string) {
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
     });
   } catch (error) {
     console.error("Error sending telegram notification:", error);
@@ -64,11 +64,11 @@ export async function GET(request: Request) {
           message = `━━━━━━━━━━━━━━━━━━━━
 ⚠️WARNING LICENCE SCRIPT⚠️
 ━━━━━━━━━━━━━━━━━━━━
-» NAMA: ${client_name}
-» IP        : ${ip_address}
+» NAMA: <code>${client_name}</code>
+» IP        : <code>${ip_address}</code>
 ━━━━━━━━━━━━━━━━━━━━
-» TGL EXP: ${expired_date}
-» TERSISA: 2hari
+» TGL EXP: <code>${expired_date}</code>
+» TERSISA: <code>2hari</code>
 » PESAN   : Segera perpanjang vps nya,
 Mumpung masih agak lama, biar gk panik 😌
 ━━━━━━━━━━━━━━━━━━━━`;
@@ -80,11 +80,11 @@ Mumpung masih agak lama, biar gk panik 😌
           message = `━━━━━━━━━━━━━━━━━━━━
 ‼️WARNING LICENCE SCRIPT‼️
 ━━━━━━━━━━━━━━━━━━━━
-» NAMA: ${client_name}
-» IP        : ${ip_address}
+» NAMA: <code>${client_name}</code>
+» IP        : <code>${ip_address}</code>
 ━━━━━━━━━━━━━━━━━━━━
-» TGL EXP: ${expired_date}
-» TERSISA: 1 hari
+» TGL EXP: <code>${expired_date}</code>
+» TERSISA: <code>1 hari</code>
 » PESAN   : Segera perpanjang vps nya,
 Biar server nya gk mati dan gk di demo user😏
 ━━━━━━━━━━━━━━━━━━━━`;
@@ -96,11 +96,11 @@ Biar server nya gk mati dan gk di demo user😏
           message = `━━━━━━━━━━━━━━━━━━━━
 🚫WARNING LICENCE SCRIPT🚫
 ━━━━━━━━━━━━━━━━━━━━
-» NAMA: ${client_name}
-» IP        : ${ip_address}
+» NAMA: <code>${client_name}</code>
+» IP        : <code>${ip_address}</code>
 ━━━━━━━━━━━━━━━━━━━━
-» TGL EXP: ${expired_date}
-» TERSISA: Gk ada sisa
+» TGL EXP: <code>${expired_date}</code>
+» TERSISA: <code>Gk ada sisa</code>
 » PESAN   : Server ini sudah expired 😵‍💫
 ━━━━━━━━━━━━━━━━━━━━`;
         }
