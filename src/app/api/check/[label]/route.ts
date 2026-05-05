@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
 
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: Promise<{ label: string }> }) {
+  const resolvedParams = await params;
+  const label = resolvedParams.label;
   try {
     const { searchParams } = new URL(request.url);
     let ip = searchParams.get("ip");
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
     }
 
     const result = await db.execute({
-      sql: "SELECT client_name, expired_date, status FROM licenses WHERE ip_address = ?",
+      sql: "SELECT client_name, expired_date, status, label FROM licenses WHERE ip_address = ?",
       args: [ip],
     });
 
@@ -40,6 +42,14 @@ export async function GET(request: Request) {
     }
 
     const license = result.rows[0];
+
+    // Ensure label matches exactly
+    if (license.label !== label) {
+      return NextResponse.json({
+        valid: false,
+        message: "License not found"
+      });
+    }
 
     // If the license is found but status is banned, we also consider it invalid
     if (license.status === "banned") {
