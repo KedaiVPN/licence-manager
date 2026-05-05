@@ -19,6 +19,7 @@ export async function initDb() {
         status TEXT DEFAULT 'active',
         auth_key TEXT NOT NULL,
         tele_id TEXT,
+        label TEXT,
         notif_state TEXT DEFAULT '{}'
       )
     `);
@@ -30,6 +31,10 @@ export async function initDb() {
 
       if (!columns.includes('tele_id')) {
         await db.execute("ALTER TABLE licenses ADD COLUMN tele_id TEXT");
+      }
+
+            if (!columns.includes('label')) {
+        await db.execute("ALTER TABLE licenses ADD COLUMN label TEXT");
       }
 
       if (!columns.includes('notif_state')) {

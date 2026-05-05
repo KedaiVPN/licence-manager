@@ -16,18 +16,22 @@ export async function GET() {
 // POST new license
 export async function POST(request: Request) {
   try {
-    const { ip_address, client_name, expired_date, auth_key, tele_id } = await request.json();
+    const { ip_address, client_name, expired_date, auth_key, tele_id, label } = await request.json();
 
-    if (!ip_address || !client_name || !expired_date) {
+    if (!ip_address || !client_name || !expired_date || !label) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (label !== "zivpn" && label !== "tunneling") {
+      return NextResponse.json({ error: "Invalid label" }, { status: 400 });
     }
 
     const finalAuthKey = auth_key || "";
     const finalTeleId = tele_id || null;
 
     await db.execute({
-      sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key, tele_id) VALUES (?, ?, ?, ?, ?, ?)",
-      args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId],
+      sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key, tele_id, label) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId, label],
     });
 
     // Only send webhook if auth_key exists (new VPS might not have it yet)
@@ -53,7 +57,7 @@ export async function POST(request: Request) {
 // PUT update license
 export async function PUT(request: Request) {
   try {
-    const { ip_address, client_name, expired_date, status, auth_key, tele_id } = await request.json();
+    const { ip_address, client_name, expired_date, status, auth_key, tele_id, label } = await request.json();
 
     if (!ip_address) {
       return NextResponse.json({ error: "IP address is required" }, { status: 400 });
@@ -81,6 +85,13 @@ export async function PUT(request: Request) {
     if (tele_id !== undefined) {
       updates.push("tele_id = ?");
       args.push(tele_id || null);
+    }
+    if (label !== undefined) {
+      if (label !== "zivpn" && label !== "tunneling") {
+        return NextResponse.json({ error: "Invalid label" }, { status: 400 });
+      }
+      updates.push("label = ?");
+      args.push(label);
     }
 
     if (updates.length === 0) {

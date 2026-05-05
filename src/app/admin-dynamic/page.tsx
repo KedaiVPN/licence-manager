@@ -14,6 +14,7 @@ type License = {
   status: "active" | "banned";
   auth_key?: string; // Hidden in UI but present in type
   tele_id?: string | null;
+  label?: string;
 };
 
 type WebhookLog = {
@@ -41,6 +42,7 @@ export default function AdminDashboard() {
     status: "active" as "active" | "banned",
     auth_key: "",
     tele_id: "",
+    label: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState("");
@@ -137,6 +139,7 @@ export default function AdminDashboard() {
       status: license.status,
       auth_key: license.auth_key || "",
       tele_id: license.tele_id || "",
+      label: license.label || "",
     });
     setIsEditing(true);
     setShowForm(true);
@@ -151,6 +154,7 @@ export default function AdminDashboard() {
       status: "active",
       auth_key: "",
       tele_id: "",
+      label: "",
     });
     setIsEditing(false);
     setFormError("");
@@ -335,6 +339,20 @@ export default function AdminDashboard() {
                         placeholder="e.g. 123456789"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Label</label>
+                      <select
+                        value={formData.label}
+                        onChange={(e) => setFormData({...formData, label: e.target.value})}
+                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                        required
+                      >
+                        <option value="" disabled>PILIH LABEL</option>
+                        <option value="zivpn">ZIVPN</option>
+                        <option value="tunneling">TUNNELING</option>
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Status</label>
                       <select
@@ -370,6 +388,7 @@ export default function AdminDashboard() {
                       <th className="p-4">Client Name</th>
                       <th className="p-4">Tele ID</th>
                       <th className="p-4">Expiration</th>
+                      <th className="p-4">Label</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
@@ -386,6 +405,7 @@ export default function AdminDashboard() {
                           <td className="p-4 text-gray-300">{license.client_name}</td>
                           <td className="p-4 text-gray-500 font-mono text-xs">{license.tele_id || "-"}</td>
                           <td className="p-4 text-gray-400">{license.expired_date}</td>
+                          <td className="p-4 text-cyan-400 font-mono text-xs uppercase">{license.label || "-"}</td>
                           <td className="p-4">
                             <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${
                               license.status === 'active'
