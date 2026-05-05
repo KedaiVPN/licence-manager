@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendWebhook } from "@/lib/webhook";
 
 const BOT_API_KEY = process.env.BOT_API_KEY;
 const ADMIN_TELE_ID = process.env.ADMIN_TELE_ID || process.env["ADMIN_TELE-ID"];
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
     const result = await db.execute("SELECT * FROM licenses WHERE status = 'active'");
 
     for (const license of result.rows) {
-      const { ip_address, client_name, expired_date, tele_id, notif_state } = license as any;
+      const { ip_address, client_name, expired_date, tele_id, notif_state, auth_key } = license as any;
 
       const expDateWib = new Date(expired_date + "T00:00:00");
 
@@ -56,6 +57,7 @@ export async function GET(request: Request) {
       let message = "";
       let shouldSend = false;
       let stateKey = "";
+      let isExpired = false;
 
       if (diffDays === 2 && currentHour === 0) {
         stateKey = `2days_${dateStr}`;
@@ -93,6 +95,7 @@ Biar server nya gk mati dan gk di demo user😏
         stateKey = `expired_${expired_date}`;
         if (!state[stateKey]) {
           shouldSend = true;
+          isExpired = true;
           message = `━━━━━━━━━━━━━━━━━━━━
 🚫WARNING LICENCE SCRIPT🚫
 ━━━━━━━━━━━━━━━━━━━━
@@ -107,6 +110,22 @@ Biar server nya gk mati dan gk di demo user😏
       }
 
       if (shouldSend) {
+        if (isExpired) {
+          // Update status to banned in database
+          await db.execute({
+            sql: "UPDATE licenses SET status = 'banned' WHERE ip_address = ?",
+            args: [ip_address]
+          });
+
+          // Send webhook to VPS
+          await sendWebhook(ip_address, auth_key || "", {
+            action: "update",
+            client_name,
+            expired_date,
+            status: "banned"
+          });
+        }
+
         // Send to ADMIN
         if (ADMIN_TELE_ID) {
           await sendTelegramMessage(ADMIN_TELE_ID, message);
