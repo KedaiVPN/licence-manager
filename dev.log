@@ -1,0 +1,41 @@
+
+> license-manager@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 554ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+○ Compiling / ...
+Database initialized and tables verified.
+ GET / 200 in 5.8s (next.js: 4.7s, proxy.ts: 132ms, application-code: 969ms)
+○ Compiling /[client_name]/monitoring ...
+Database initialized and tables verified.
+ GET /Alpha-Node/monitoring 200 in 4.7s (next.js: 4.6s, proxy.ts: 9ms, application-code: 96ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] EventSource failed: [object Event]
+    at ServerMonitor.useEffect.connectSSE (src/app/[client_name]/monitoring/ServerMonitor.tsx:100:17)
+   98 |
+   99 |       eventSource.onerror = (err) => {
+> 100 |         console.error("EventSource failed:", err);
+      |                 ^
+  101 |         eventSource?.close();
+  102 |         setIsConnected(false);
+  103 |         setError("Connection to telemetry stream lost. Attempting to reconnect..."); (src/app/[client_name]/monitoring/ServerMonitor.tsx:100:17)

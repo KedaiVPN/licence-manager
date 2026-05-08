@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   LogOut, Shield, Server, Edit2, Trash2, Plus,
   Activity, RefreshCw, AlertTriangle, AlertCircle, X
@@ -15,6 +16,8 @@ type License = {
   auth_key?: string; // Hidden in UI but present in type
   tele_id?: string | null;
   label?: string;
+  domain?: string | null;
+  is_monitoring_enabled?: number;
 };
 
 type WebhookLog = {
@@ -43,6 +46,8 @@ export default function AdminDashboard() {
     auth_key: "",
     tele_id: "",
     label: "",
+    domain: "",
+    is_monitoring_enabled: false,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState("");
@@ -140,6 +145,8 @@ export default function AdminDashboard() {
       auth_key: license.auth_key || "",
       tele_id: license.tele_id || "",
       label: license.label || "",
+      domain: license.domain || "",
+      is_monitoring_enabled: Boolean(license.is_monitoring_enabled),
     });
     setIsEditing(true);
     setShowForm(true);
@@ -155,6 +162,8 @@ export default function AdminDashboard() {
       auth_key: "",
       tele_id: "",
       label: "",
+      domain: "",
+      is_monitoring_enabled: false,
     });
     setIsEditing(false);
     setFormError("");
@@ -218,9 +227,9 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex gap-4">
-              <a href="/" className="text-xs text-cyan-500 border border-cyan-900/50 px-3 py-2 hover:bg-cyan-900/30 transition-colors uppercase tracking-widest flex items-center gap-2">
+              <Link href="/" className="text-xs text-cyan-500 border border-cyan-900/50 px-3 py-2 hover:bg-cyan-900/30 transition-colors uppercase tracking-widest flex items-center gap-2">
                 <Activity className="w-4 h-4" /> Public view
-              </a>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="text-xs text-pink-500 border border-pink-900/50 px-3 py-2 hover:bg-pink-900/30 transition-colors uppercase tracking-widest flex items-center gap-2"
@@ -303,7 +312,10 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         value={formData.client_name}
-                        onChange={(e) => setFormData({...formData, client_name: e.target.value})}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\s+/g, '-');
+                          setFormData({...formData, client_name: val});
+                        }}
                         className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
                         placeholder="Corp_Alpha"
                         required
@@ -353,6 +365,34 @@ export default function AdminDashboard() {
                         <option value="tunneling">TUNNELING</option>
                       </select>
                     </div>
+
+                    <div className="md:col-span-2 flex items-center mt-2 mb-2 bg-black border border-cyan-800 p-3 rounded">
+                      <input
+                        type="checkbox"
+                        id="monitoringToggle"
+                        checked={formData.is_monitoring_enabled}
+                        onChange={(e) => setFormData({...formData, is_monitoring_enabled: e.target.checked})}
+                        className="w-5 h-5 accent-cyan-500 mr-3 cursor-pointer"
+                      />
+                      <label htmlFor="monitoringToggle" className="text-sm font-bold uppercase tracking-wider text-cyan-400 cursor-pointer">
+                        Aktifkan Monitoring Publik
+                      </label>
+                    </div>
+
+                    {formData.is_monitoring_enabled && (
+                      <div className="md:col-span-2">
+                        <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Domain Server <span className="text-pink-500">*</span></label>
+                        <input
+                          type="text"
+                          value={formData.domain}
+                          onChange={(e) => setFormData({...formData, domain: e.target.value})}
+                          className="w-full bg-black border border-pink-500/50 p-2 text-cyan-300 focus:border-pink-400 focus:outline-none font-mono text-sm shadow-[0_0_10px_rgba(236,72,153,0.1)]"
+                          placeholder="node1.example.com"
+                          required={formData.is_monitoring_enabled}
+                        />
+                      </div>
+                    )}
+
                     <div>
                       <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Status</label>
                       <select

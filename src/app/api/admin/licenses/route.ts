@@ -16,7 +16,7 @@ export async function GET() {
 // POST new license
 export async function POST(request: Request) {
   try {
-    const { ip_address, client_name, expired_date, auth_key, tele_id, label } = await request.json();
+    const { ip_address, client_name, expired_date, auth_key, tele_id, label, domain, is_monitoring_enabled } = await request.json();
 
     if (!ip_address || !client_name || !expired_date || !label) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,12 +26,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid label" }, { status: 400 });
     }
 
+    // Validate client_name uniqueness
+    const existingClient = await db.execute({
+      sql: "SELECT ip_address FROM licenses WHERE client_name = ?",
+      args: [client_name],
+    });
+
+    if (existingClient.rows.length > 0) {
+      return NextResponse.json({ error: "Client name already exists (1 client = 1 node)" }, { status: 400 });
+    }
+
     const finalAuthKey = auth_key || "";
     const finalTeleId = tele_id || null;
 
     await db.execute({
-      sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key, tele_id, label) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId, label],
+      sql: "INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key, tele_id, label, domain, is_monitoring_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId, label, domain || null, is_monitoring_enabled ? 1 : 0],
     });
 
     // Only send webhook if auth_key exists (new VPS might not have it yet)
@@ -57,16 +67,25 @@ export async function POST(request: Request) {
 // PUT update license
 export async function PUT(request: Request) {
   try {
-    const { ip_address, client_name, expired_date, status, auth_key, tele_id, label } = await request.json();
+    const { ip_address, client_name, expired_date, status, auth_key, tele_id, label, domain, is_monitoring_enabled } = await request.json();
 
     if (!ip_address) {
       return NextResponse.json({ error: "IP address is required" }, { status: 400 });
     }
 
     const updates = [];
-    const args: string[] = [];
+    const args: (string | number)[] = [];
 
     if (client_name !== undefined) {
+      // Validate client_name uniqueness for PUT (excluding current IP)
+      const existingClient = await db.execute({
+        sql: "SELECT ip_address FROM licenses WHERE client_name = ? AND ip_address != ?",
+        args: [client_name, ip_address],
+      });
+
+      if (existingClient.rows.length > 0) {
+        return NextResponse.json({ error: "Client name already exists (1 client = 1 node)" }, { status: 400 });
+      }
       updates.push("client_name = ?");
       args.push(client_name);
     }
@@ -92,6 +111,16 @@ export async function PUT(request: Request) {
       }
       updates.push("label = ?");
       args.push(label);
+    }
+
+    if (domain !== undefined) {
+      updates.push("domain = ?");
+      args.push(domain || null);
+    }
+
+    if (is_monitoring_enabled !== undefined) {
+      updates.push("is_monitoring_enabled = ?");
+      args.push(is_monitoring_enabled ? 1 : 0);
     }
 
     if (updates.length === 0) {

@@ -20,7 +20,9 @@ export async function initDb() {
         auth_key TEXT NOT NULL,
         tele_id TEXT,
         label TEXT,
-        notif_state TEXT DEFAULT '{}'
+        notif_state TEXT DEFAULT '{}',
+        domain TEXT,
+        is_monitoring_enabled INTEGER DEFAULT 0
       )
     `);
 
@@ -37,8 +39,16 @@ export async function initDb() {
         await db.execute("ALTER TABLE licenses ADD COLUMN label TEXT");
       }
 
-      if (!columns.includes('notif_state')) {
+if (!columns.includes('notif_state')) {
         await db.execute("ALTER TABLE licenses ADD COLUMN notif_state TEXT DEFAULT '{}'");
+      }
+
+      if (!columns.includes('domain')) {
+        await db.execute("ALTER TABLE licenses ADD COLUMN domain TEXT");
+      }
+
+      if (!columns.includes('is_monitoring_enabled')) {
+        await db.execute("ALTER TABLE licenses ADD COLUMN is_monitoring_enabled INTEGER DEFAULT 0");
       }
     } catch (e) {
       console.error("Failed to migrate licenses table:", e);
