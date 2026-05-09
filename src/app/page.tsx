@@ -9,6 +9,7 @@ export default async function Home() {
 
   let totalVPS = 0;
   let activeVPS = 0;
+  let totalClients = 0;
   let nodes: Record<string, unknown>[] = [];
 
   try {
@@ -17,7 +18,13 @@ export default async function Home() {
     totalVPS = result.rows.length;
     activeVPS = result.rows.filter(row => row.status === 'active').length;
 
-    nodes = result.rows.sort((a, b) => (a.client_name as string).localeCompare(b.client_name as string));
+    // We maintain unique clients count for the stat block
+    const uniqueClients = new Set(result.rows.map(row => row.client_name as string));
+    totalClients = uniqueClients.size;
+
+    nodes = result.rows
+      .filter(row => row.is_monitoring_enabled === 1)
+      .sort((a, b) => (a.client_name as string).localeCompare(b.client_name as string));
   } catch (error) {
     console.error("Failed to fetch public stats:", error);
   }
@@ -87,7 +94,7 @@ export default async function Home() {
                 </div>
                 <h3 className="text-sm text-gray-400 uppercase tracking-wider">Registered Clients</h3>
               </div>
-              <div className="text-5xl font-black text-white">{nodes.length}</div>
+              <div className="text-5xl font-black text-white">{totalClients}</div>
             </div>
           </div>
 
@@ -100,34 +107,19 @@ export default async function Home() {
 
             {nodes.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {nodes.map((node: any, i) => {
-                  const isMonitoringEnabled = node.is_monitoring_enabled === 1;
-                  const CardContent = (
-                    <div className={`px-4 py-3 rounded flex items-center justify-between border transition-all ${
-                      isMonitoringEnabled
-                        ? 'bg-cyan-950/20 border-cyan-500/50 hover:bg-cyan-900/40 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer group'
-                        : 'bg-gray-900/50 border-gray-800'
-                    }`}>
+                {nodes.map((node: Record<string, any>, i) => (
+                  <Link key={i} href={`/${node.client_name}/monitoring`} className="block">
+                    <div className="px-4 py-3 rounded flex items-center justify-between border transition-all bg-cyan-950/20 border-cyan-500/50 hover:bg-cyan-900/40 hover:border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer group">
                       <div className="flex items-center space-x-3 truncate">
-                        <div className={`w-2 h-2 rounded-full ${isMonitoringEnabled ? 'bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,1)] animate-pulse' : 'bg-gray-500'}`}></div>
-                        <span className={`text-sm truncate ${isMonitoringEnabled ? 'text-cyan-300 font-bold' : 'text-gray-400'}`}>
+                        <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,1)] animate-pulse"></div>
+                        <span className="text-sm truncate text-cyan-300 font-bold">
                           {node.client_name}
                         </span>
                       </div>
-                      {isMonitoringEnabled && (
-                        <Activity className="w-4 h-4 text-cyan-400 opacity-70 group-hover:opacity-100 transition-opacity" />
-                      )}
+                      <Activity className="w-4 h-4 text-cyan-400 opacity-70 group-hover:opacity-100 transition-opacity" />
                     </div>
-                  );
-
-                  return isMonitoringEnabled ? (
-                    <Link key={i} href={`/${node.client_name}/monitoring`} className="block">
-                      {CardContent}
-                    </Link>
-                  ) : (
-                    <div key={i}>{CardContent}</div>
-                  );
-                })}
+                  </Link>
+                ))}
               </div>
             ) : (
               <div className="text-gray-500 italic p-8 text-center border border-dashed border-gray-800 rounded">
