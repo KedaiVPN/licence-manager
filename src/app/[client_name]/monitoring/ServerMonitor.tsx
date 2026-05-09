@@ -54,7 +54,7 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
 
     const connectSSE = () => {
       // Connect directly to the VPS domain
-      eventSource = new EventSource(`https://${domain}/monitoring-stream`);
+      eventSource = new EventSource(`https://${domain}/api/monitoring/stream`);
 
       eventSource.onopen = () => {
         setIsConnected(true);
