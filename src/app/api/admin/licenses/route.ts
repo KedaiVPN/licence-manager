@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendWebhook } from "@/lib/webhook";
+import { sendLicenseNotification } from "@/lib/telegram";
 import crypto from "crypto";
 
 // GET all licenses
@@ -54,6 +55,15 @@ export async function POST(request: Request) {
         status: "active",
       });
     }
+
+    // Notify client owner (tele_id) or fallback to admin after successful creation
+    await sendLicenseNotification(
+      client_name,
+      ip_address,
+      expired_date,
+      finalTeleId,
+      "create"
+    );
 
     return NextResponse.json({ success: true, message: "License created successfully" });
   } catch (error: any) {
@@ -156,6 +166,17 @@ export async function PUT(request: Request) {
             expired_date: license.expired_date as string,
             status: license.status as "active" | "banned",
           }
+        );
+      }
+
+      // If expired_date was updated (perpanjangan masa aktif), notify client owner or fallback to admin
+      if (expired_date !== undefined) {
+        await sendLicenseNotification(
+          license.client_name as string,
+          license.ip_address as string,
+          license.expired_date as string,
+          license.tele_id as string | null,
+          "extend"
         );
       }
     }
