@@ -1,8 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Canvas & surfaces */
+  --canvas: #050507;
+  --surface: #101010;
+  --surface-raised: #151515;
+  --surface-inset: #09090b;
+
+  /* Structure */
+  --border: #2c2c2c;
+  --border-strong: #3d3a39;
+
+  /* Text */
+  --text-primary: #f2f2f2;
+  --text-secondary: #b8b3b0;
+  --text-muted: #8b949e;
+
+  /* Brand & semantic signals */
+  --brand: #22d3ee;
+  --brand-strong: #06b6d4;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ec4899;
+
+  /* Radius */
+  --radius-control: 6px;
+  --radius-panel: 8px;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-default: 200ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --background: var(--canvas);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
@@ -12,15 +48,161 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
+}
+
+html {
+  background: var(--canvas);
+  scrollbar-color: var(--border-strong) var(--canvas);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background: var(--canvas);
+  color: var(--text-primary);
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--danger);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Shared product surfaces */
+.ui-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.ui-panel-inset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-inset);
+}
+
+.ui-label {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.ui-control {
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform 90ms var(--ease-out);
+}
+
+.ui-control:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--border-strong));
+}
+
+.ui-control:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ui-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ui-input {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.ui-input::placeholder {
+  color: #555b63;
+}
+
+.ui-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgb(34 211 238 / 0.1);
+  outline: none;
+}
+
+.status-success {
+  border-color: rgb(74 222 128 / 0.55);
+  background: rgb(20 83 45 / 0.28);
+  color: #86efac;
+  box-shadow: 0 0 14px rgb(34 197 94 / 0.38);
+}
+
+.status-warning {
+  border-color: rgb(234 179 8 / 0.5);
+  background: rgb(113 63 18 / 0.22);
+  color: #fde047;
+}
+
+.status-danger {
+  border-color: rgb(236 72 153 / 0.5);
+  background: rgb(80 7 36 / 0.28);
+  color: #f472b6;
+}
+
+.status-neutral {
+  border-color: var(--border-strong);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+}
+
+/* Compact terminal scrollbar */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid var(--canvas);
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #52504e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-default: 0ms;
+    --duration-slow: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
