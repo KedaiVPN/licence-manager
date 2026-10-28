@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LogOut, ArrowLeft, Terminal, AlertCircle } from "lucide-react";
@@ -23,7 +23,7 @@ type InstallJob = {
 
 const ACTIVE_STATUSES = ["pending", "running"];
 
-export default function InstallPage() {
+function InstallPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ipParam = searchParams.get("ip");
@@ -260,5 +260,13 @@ export default function InstallPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function InstallPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-cyan-700 flex items-center justify-center font-mono">Memuat...</div>}>
+      <InstallPageInner />
+    </Suspense>
   );
 }
