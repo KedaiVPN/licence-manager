@@ -85,8 +85,18 @@ export async function POST(request: Request) {
 }
 
 // GET list jobs (for admin dashboard list view)
-export async function GET() {
+// Support ?ip=<address> -> return the latest job for that IP (resume view).
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const ip = searchParams.get("ip");
+    if (ip) {
+      const res = await db.execute({
+        sql: "SELECT id, ip_address, client_name, domain, status, log, created_at, started_at, finished_at FROM install_jobs WHERE ip_address = ? ORDER BY id DESC LIMIT 1",
+        args: [ip],
+      });
+      return NextResponse.json({ job: res.rows[0] || null });
+    }
     const result = await db.execute(
       "SELECT id, ip_address, client_name, domain, status, created_at, started_at, finished_at FROM install_jobs ORDER BY id DESC LIMIT 100"
     );

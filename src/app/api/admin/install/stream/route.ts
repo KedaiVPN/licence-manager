@@ -13,8 +13,17 @@ export async function GET(request: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
+      let closed = false;
+      const close = () => {
+        if (closed) return;
+        closed = true;
+        clearInterval(interval);
+        clearInterval(keepalive);
+        try { controller.close(); } catch { /* already closed */ }
+      };
 
-      const interval = setInterval(async () => {
+      // Poll DB untuk log baru & status final.
+      const tick = async () => {
         try {
           const res = await db.execute({
             sql: "SELECT log, status, finished_at FROM install_jobs WHERE id = ?",
@@ -23,8 +32,7 @@ export async function GET(request: Request) {
 
           if (res.rows.length === 0) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Job not found" })}\n\n`));
-            clearInterval(interval);
-            controller.close();
+            close();
             return;
           }
 
@@ -43,17 +51,23 @@ export async function GET(request: Request) {
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ done: true, status: job.status })}\n\n`)
             );
-            clearInterval(interval);
-            controller.close();
+            close();
           }
         } catch (e) {
           // Keep stream alive or terminate on fatal
         }
-      }, 1000);
+      };
 
-      request.signal.addEventListener("abort", () => {
-        clearInterval(interval);
-      });
+      const interval = setInterval(tick, 1000);
+      // Keepalive comment supaya koneksi tidak diputus proxy/idle.
+      const keepalive = setInterval(() => {
+        try { controller.enqueue(encoder.encode(": ping\n\n")); } catch { /* closed */ }
+      }, 15000);
+
+      // Replay log yang sudah ada segera, bukan menunggu 1 detik pertama.
+      await tick();
+
+      request.signal.addEventListener("abort", () => close());
     },
   });
 
