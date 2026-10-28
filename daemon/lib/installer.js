@@ -53,4 +53,13 @@ function buildRemoteCommand({ domain, mode = "auto", sshPort = 22 }) {
   ].join(" ");
 }
 
-module.exports = { stripAnsi, detectPrompt, sanitizeLog, buildRemoteCommand };
+// Kontrak API daemon — sumber tunggal kebenaran agar service.js dan route
+// Vercel selalu selaras. Log & finish memakai path yang SAMA:
+//   POST  /api/daemon/install/:id  { line }
+//   PATCH /api/daemon/install/:id  { status, message? }
+function daemonEndpoints(jobId) {
+  const base = `/api/daemon/install/${jobId}`;
+  return { log: base, finish: base };
+}
+
+module.exports = { stripAnsi, detectPrompt, sanitizeLog, buildRemoteCommand, daemonEndpoints };

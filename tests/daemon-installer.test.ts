@@ -63,3 +63,17 @@ describe("buildRemoteCommand", () => {
     assert.throws(() => buildRemoteCommand({ domain: "a\nrm -rf /", mode: "auto" }));
   });
 });
+
+describe("daemon API endpoints contract", () => {
+  const { daemonEndpoints } = require("../daemon/lib/installer.js");
+
+  test("log & finish memakai path /api/daemon/install/:id (tanpa /log suffix)", () => {
+    const ep = daemonEndpoints(7);
+    assert.equal(ep.log, "/api/daemon/install/7");
+    assert.equal(ep.finish, "/api/daemon/install/7");
+  });
+
+  test("id numerik di-inject apa adanya", () => {
+    assert.equal(daemonEndpoints(42).log, "/api/daemon/install/42");
+  });
+});

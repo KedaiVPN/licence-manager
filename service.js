@@ -70,15 +70,15 @@ function httpGet(urlPath, token) {
   });
 }
 
-// -- Helper: HTTP POST ke Vercel -----------------------------
-function httpPost(urlPath, body, token) {
+// -- Helper: HTTP POST/PATCH ke Vercel ------------------------
+function httpPost(urlPath, body, token, method = "POST") {
   return new Promise((resolve, reject) => {
     const url = new URL(config.VERCEL_BASE_URL + urlPath);
     const bodyStr = JSON.stringify(body);
     const opts = {
       hostname: url.hostname,
       path: url.pathname + url.search,
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(bodyStr),
@@ -143,7 +143,7 @@ if (config.DAEMON_TOKEN && config.INSTALL_ENC_KEY) {
 async function pushLog(jobId, line) {
   if (!config.DAEMON_TOKEN) return;
   try {
-    await httpPost(`/api/daemon/install/${jobId}/log`, { line }, config.DAEMON_TOKEN);
+    await httpPost(installerLib.daemonEndpoints(jobId).log, { line }, config.DAEMON_TOKEN);
   } catch (e) {
     console.error(`[JOB ${jobId}] LOG FAIL: ${e.message}`);
   }
@@ -152,7 +152,7 @@ async function pushLog(jobId, line) {
 async function finishJob(jobId, status, message) {
   if (!config.DAEMON_TOKEN) return;
   try {
-    await httpPost(`/api/daemon/install/${jobId}`, { status, message }, config.DAEMON_TOKEN);
+    await httpPost(installerLib.daemonEndpoints(jobId).finish, { status, message }, config.DAEMON_TOKEN, "PATCH");
   } catch (e) {
     console.error(`[JOB ${jobId}] FINISH FAIL: ${e.message}`);
   }
