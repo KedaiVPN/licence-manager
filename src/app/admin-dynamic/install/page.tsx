@@ -122,7 +122,7 @@ function InstallPageInner() {
         if (data.chunk) setJobLog((previous) => previous + data.chunk);
         if (data.status) setJobStatus(data.status);
         if (data.done) {
-          setJobStatus(data.status || "done");
+          setJobStatus(data.status || "success");
           evtSource.close();
         }
       } catch { /* SSE keepalive */ }
@@ -137,13 +137,13 @@ function InstallPageInner() {
 
   const jobIsActive = !!job && ACTIVE_STATUSES.includes(jobStatus || job.status);
   const statusColor =
-    jobStatus === "success" ? "border-cyan-500/50 text-cyan-400"
-      : jobStatus === "failed" ? "border-pink-500/50 text-pink-400"
-        : jobStatus === "cancelled" ? "border-gray-500/50 text-gray-400"
-          : "border-yellow-500/50 text-yellow-400";
+    jobStatus === "success" ? "border-green-400/60 text-green-300 bg-green-950/30 shadow-[0_0_14px_rgba(34,197,94,0.6)]"
+      : jobStatus === "failed" ? "border-pink-500/50 text-pink-400 bg-pink-950/30"
+        : jobStatus === "cancelled" ? "border-gray-500/50 text-gray-400 bg-gray-900/40"
+          : "border-yellow-500/50 text-yellow-400 bg-yellow-950/20";
 
   return (
-    <div className="min-h-screen bg-black text-gray-300">
+    <div className="min-h-screen bg-black text-gray-300 font-mono selection:bg-pink-500 selection:text-white">
       <header className="border-b border-cyan-900/50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
