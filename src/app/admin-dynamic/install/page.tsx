@@ -60,7 +60,9 @@ export default function InstallPage() {
           const { job: latest } = await jobRes.json();
           if (latest && latest.status !== "cancelled") {
             setJob(latest);
-            setJobLog(latest.log || "");
+            // SSE selalu replay log dari byte pertama saat halaman dibuka lagi.
+            // Jangan isi dari GET juga agar output tidak terduplikasi.
+            setJobLog("");
             setJobStatus(latest.status);
           }
         }
