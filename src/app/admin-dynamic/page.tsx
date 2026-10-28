@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   LogOut, Shield, Server, Edit2, Trash2, Plus,
-  Activity, RefreshCw, AlertTriangle, AlertCircle, X
+  Activity, RefreshCw, AlertTriangle, AlertCircle, X, Terminal
 } from "lucide-react";
 
 type License = {
@@ -27,6 +27,14 @@ type WebhookLog = {
   status: string;
   error_message: string;
   created_at: string;
+};
+
+type InstallJob = {
+  id: number;
+  ip_address: string;
+  client_name: string;
+  domain: string;
+  status: string;
 };
 
 export default function AdminDashboard() {
@@ -52,6 +60,86 @@ export default function AdminDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Install modal state
+  const [showInstaller, setShowInstaller] = useState(false);
+  const [installTarget, setInstallTarget] = useState<License | null>(null);
+  const [installData, setInstallData] = useState({ domain: "", password: "", ssh_port: "22" });
+  const [installError, setInstallError] = useState("");
+  const [installLoading, setInstallLoading] = useState(false);
+  const [activeJob, setActiveJob] = useState<InstallJob | null>(null);
+  const [jobLog, setJobLog] = useState<string>("");
+  const [jobStatus, setJobStatus] = useState<string>("");
+
+  const openInstallModal = (license: License) => {
+    setInstallTarget(license);
+    setInstallData({ domain: license.domain || "", password: "", ssh_port: "22" });
+    setInstallError("");
+    setShowInstaller(true);
+  };
+
+  const startInstall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!installTarget) return;
+    setInstallLoading(true);
+    setInstallError("");
+    try {
+      const res = await fetch("/api/admin/install", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ip_address: installTarget.ip_address,
+          client_name: installTarget.client_name,
+          domain: installData.domain,
+          ssh_port: Number(installData.ssh_port) || 22,
+          password: installData.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setInstallError(data.error || "Failed to create install job");
+        setInstallLoading(false);
+        return;
+      }
+      // Job dibuat -> tutup modal input, buka SSE console
+      setActiveJob({ id: data.job_id, ip_address: installTarget.ip_address, client_name: installTarget.client_name, domain: installData.domain, status: "pending" });
+      setShowInstaller(false);
+      setJobLog("");
+      setJobStatus("pending");
+    } catch (err) {
+      setInstallError("Network error while creating install job");
+    } finally {
+      setInstallLoading(false);
+    }
+  };
+
+  // SSE live log utk activeJob
+  useEffect(() => {
+    if (!activeJob) return;
+    setJobLog("");
+    setJobStatus("pending");
+
+    const evtSource = new EventSource(`/api/admin/install/stream?id=${activeJob.id}`);
+
+    evtSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.chunk) setJobLog((prev) => prev + data.chunk);
+        if (data.status) setJobStatus(data.status);
+        if (data.done) {
+          evtSource.close();
+        }
+      } catch { /* ignore non-JSON keepalive */ }
+    };
+
+    evtSource.onerror = () => {
+      // Keep connection or close when server terminates
+    };
+
+    return () => {
+      evtSource.close();
+    };
+  }, [activeJob]);
 
   useEffect(() => {
     fetchData();
@@ -456,6 +544,15 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="p-4 flex justify-end gap-2">
+                            {license.status === "active" && (
+                              <button
+                                onClick={() => openInstallModal(license)}
+                                className="p-2 text-cyan-600 hover:text-cyan-300 hover:bg-cyan-900/30 transition-colors border border-transparent hover:border-cyan-800"
+                                title="Install Dynamic Script"
+                              >
+                                <Terminal className="w-4 h-4" />
+                              </button>
+                            )}
                             <button
                               onClick={() => editLicense(license)}
                               className="p-2 text-cyan-600 hover:text-cyan-400 hover:bg-cyan-900/30 transition-colors border border-transparent hover:border-cyan-800"
@@ -543,7 +640,108 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
-        </main>
+          {/* Install Modal (domain + root password) */}
+      {showInstaller && installTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-cyan-500/50 p-6 shadow-[0_0_30px_rgba(6,182,212,0.2)] w-full max-w-lg relative">
+            <button
+              onClick={() => setShowInstaller(false)}
+              className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h3 className="text-lg font-bold text-cyan-400 mb-1 uppercase tracking-widest border-b border-cyan-900/50 pb-2 pr-8">
+              Remote Install
+            </h3>
+            <p className="text-xs text-cyan-700 mb-4 font-mono">
+              Target: <span className="text-cyan-400">{installTarget.ip_address}</span> ({installTarget.client_name})
+            </p>
+
+            {installError && (
+              <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" /> {installError}
+              </div>
+            )}
+
+            <form onSubmit={startInstall} className="space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Domain</label>
+                <input
+                  type="text"
+                  value={installData.domain}
+                  onChange={(e) => setInstallData({ ...installData, domain: e.target.value })}
+                  className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                  placeholder="node1.example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Root Password</label>
+                <input
+                  type="password"
+                  value={installData.password}
+                  onChange={(e) => setInstallData({ ...installData, password: e.target.value })}
+                  className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                  placeholder="••••••••"
+                  required
+                />
+                <p className="text-[10px] text-cyan-800 mt-1">Password dienkripsi (AES-256-GCM) dan tidak ditampilkan di log.</p>
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">SSH Port</label>
+                <input
+                  type="number"
+                  value={installData.ssh_port}
+                  onChange={(e) => setInstallData({ ...installData, ssh_port: e.target.value })}
+                  className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={installLoading}
+                className="w-full bg-cyan-950/50 border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-500 hover:text-black transition-colors disabled:opacity-50"
+              >
+                {installLoading ? "QUEUING..." : "START INSTALLATION"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Install Console (SSE log live) */}
+      {activeJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-black border border-cyan-500/50 w-full max-w-3xl relative flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-cyan-900/50 p-4">
+              <div className="flex items-center gap-3">
+                <Terminal className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-widest">
+                    Install Console — {activeJob.ip_address}
+                  </h3>
+                  <p className="text-[10px] text-cyan-700 font-mono">Job #{activeJob.id} · {activeJob.domain}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${
+                  jobStatus === 'success' ? 'border-cyan-500/50 text-cyan-400'
+                  : jobStatus === 'failed' ? 'border-pink-500/50 text-pink-400'
+                  : 'border-yellow-500/50 text-yellow-400'
+                }`}>
+                  {jobStatus}
+                </span>
+                <button onClick={() => setActiveJob(null)} className="text-cyan-500 hover:text-pink-500 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 font-mono text-xs text-cyan-300 whitespace-pre-wrap bg-black">
+              {jobLog || <span className="text-cyan-800 animate-pulse">Menunggu daemon mengambil job...</span>}
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
       </div>
     </div>
   );

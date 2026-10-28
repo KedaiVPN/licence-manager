@@ -66,6 +66,23 @@ if (!columns.includes('notif_state')) {
       )
     `);
 
+    // Create install_jobs table for remote VPS script installation
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS install_jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ip_address TEXT NOT NULL,
+        client_name TEXT NOT NULL,
+        domain TEXT NOT NULL,
+        ssh_port INTEGER DEFAULT 22,
+        password_enc TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        log TEXT DEFAULT '',
+        started_at DATETIME,
+        finished_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log("Database initialized and tables verified.");
   } catch (error) {
     console.error("Failed to initialize database:", error);
