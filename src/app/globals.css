@@ -152,6 +152,65 @@ body {
   box-shadow: 0 0 14px rgb(34 197 94 / 0.38);
 }
 
+/* Interactive card with affordance & tap feedback */
+.ui-card-interactive {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.ui-card-interactive:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--border));
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface));
+  box-shadow: 0 0 18px rgb(34 211 238 / 0.12);
+  transform: translateY(-2px);
+}
+
+.ui-card-interactive:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 0 10px rgb(34 211 238 / 0.12);
+}
+
+.ui-card-interactive.selected {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+  box-shadow: 0 0 14px rgb(236 72 153 / 0.15);
+}
+
+/* Ripple feedback on tap */
+.ui-card-interactive::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgb(34 211 238 / 0.14);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ui-card-interactive:active::before {
+  animation: card-ripple 550ms ease-out;
+}
+
+@keyframes card-ripple {
+  to {
+    width: 320px;
+    height: 320px;
+    opacity: 0;
+  }
+}
+
 .status-warning {
   border-color: rgb(234 179 8 / 0.5);
   background: rgb(113 63 18 / 0.22);

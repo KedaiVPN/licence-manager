@@ -1,6 +1,7 @@
 import { db, initDb } from "@/lib/db";
 import { Server, Activity, Users } from "lucide-react";
 import Link from "next/link";
+import NodeCardLink from "./NodeCardLink";
 export const revalidate = 60;
 
 export default async function Home() {
@@ -103,17 +104,7 @@ export default async function Home() {
             {nodes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {nodes.map((node: Record<string, any>, i) => (
-                  <Link key={i} href={`/${node.client_name}/monitoring`} className="block">
-                    <div className="ui-panel p-4 flex items-center justify-between hover:border-cyan-500/50 hover:bg-cyan-950/10 transition-all group cursor-pointer">
-                      <div className="flex items-center space-x-3 truncate">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse"></div>
-                        <span className="text-sm truncate text-cyan-300 font-bold">
-                          {node.client_name}
-                        </span>
-                      </div>
-                      <Activity className="w-4 h-4 text-cyan-600 group-hover:text-cyan-400 transition-colors" />
-                    </div>
-                  </Link>
+                  <NodeCardLink key={i} clientName={node.client_name} />
                 ))}
               </div>
             ) : (
