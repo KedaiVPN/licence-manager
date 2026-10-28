@@ -4,12 +4,12 @@
 // Cara kerja:
 //   - Semua env dibaca dari file .env di direktori yang sama.
 //   - Jika DAEMON_TOKEN ter-set, role installer juga aktif.
-//   - Cron expiry ping selalu aktif (idempotent, aman dobel dengan cron.js lama).
+//   - Cron expiry ping selalu aktif (idempotent, aman dobel dengan service.js lama).
 //
-// Untuk VPS yang SUDAH punya cron.js di PM2:
-//   1. Stop cron.js lama:  pm2 stop cron
-//   2. Ganti entry point:  pm2 start /path/ke/cron.js --name cron
-//   3. Buat file .env di direktori yang sama dengan cron.js.
+// Untuk VPS yang SUDAH punya service.js di PM2:
+//   1. Stop service lama:  pm2 stop service
+//   2. Ganti entry point:  pm2 start /path/ke/service.js --name service
+//   3. Buat file .env di direktori yang sama dengan service.js.
 // ============================================================
 
 // -- .env auto-loader (tanpa dependency) ----------------------
@@ -117,8 +117,8 @@ async function pingCron() {
 // ROLE 2: Installer runner (hanya aktif bila DAEMON_TOKEN ada)
 //
 // Fungsi murni ada di daemon/lib/installer.js (ada di repo).
-// Di sini kita require ulang karena cron.js dan installer.js
-// sama-sama di-fork ke /www/wwwroot/lm-installer/.
+// Di sini kita require ulang karena file ini dan installer.js
+// sama-sama dideploy ke /www/wwwroot/lm-installer/.
 // ============================================================
 
 let installerReady = false;

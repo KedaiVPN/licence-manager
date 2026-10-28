@@ -60,17 +60,20 @@ node scripts/setup-webhook.js <YOUR_BOT_API_KEY> <YOUR_VERCEL_DOMAIN>
 \`\`\`
 
 ### Setup Hourly Cron Jobs (For Free Vercel Accounts)
-Vercel Hobby (Free) only allows 1 cron execution per day. To make expiration notifications work hourly as intended, we have provided a script `cron.js` which can be run using `pm2` on your VPS.
+Vercel Hobby (Free) only allows 1 cron execution per day. To make expiration notifications work hourly as intended, we have provided a script `service.js` which can be run using `pm2` on your VPS.
 
-1. Transfer the `cron.js` file to your server.
-2. (Optional) If you use `CRON_SECRET` in your Vercel Environment Variables, edit `cron.js` or export the environment variable on your server before starting the script.
+1. Transfer the `service.js` file (and the `daemon/` folder) to your server.
+2. Create a `.env` file next to `service.js` with your `CRON_SECRET`, `DAEMON_TOKEN` and `INSTALL_ENC_KEY` (must match Vercel Environment Variables). The script loads it automatically.
 3. Run the script using pm2:
    ```bash
    npm install -g pm2
-   pm2 start cron.js --name cron
+   npm install --omit=dev
+   pm2 start service.js --name service
    pm2 save
    ```
-This script will ping your Vercel app every hour to trigger the telegram notification logic securely.
+This script runs two roles in a single process:
+- Pings your Vercel app every hour to trigger the telegram notification logic securely (same behavior as the old `cron.js`).
+- Polls for remote install jobs and executes them via SSH (active when `DAEMON_TOKEN` + `INSTALL_ENC_KEY` are set).
 
 ### 3. Local Development
 
