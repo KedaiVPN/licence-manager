@@ -60,8 +60,6 @@ function InstallPageInner() {
           const { job: latest } = await jobRes.json();
           if (latest && latest.status !== "cancelled") {
             setJob(latest);
-            // SSE selalu replay log dari byte pertama saat halaman dibuka lagi.
-            // Jangan isi dari GET juga agar output tidak terduplikasi.
             setJobLog("");
             setJobStatus(latest.status);
           }
@@ -137,31 +135,34 @@ function InstallPageInner() {
 
   const jobIsActive = !!job && ACTIVE_STATUSES.includes(jobStatus || job.status);
   const statusColor =
-    jobStatus === "success" ? "border-green-400/60 text-green-300 bg-green-950/30 shadow-[0_0_14px_rgba(34,197,94,0.6)]"
-      : jobStatus === "failed" ? "border-pink-500/50 text-pink-400 bg-pink-950/30"
-        : jobStatus === "cancelled" ? "border-gray-500/50 text-gray-400 bg-gray-900/40"
+    jobStatus === "success"
+      ? "border-green-400/60 text-green-300 bg-green-950/30 shadow-[0_0_14px_rgba(34,197,94,0.6)]"
+      : jobStatus === "failed"
+        ? "border-pink-500/50 text-pink-400 bg-pink-950/30"
+        : jobStatus === "cancelled"
+          ? "border-gray-500/50 text-gray-400 bg-gray-900/40"
           : "border-yellow-500/50 text-yellow-400 bg-yellow-950/20";
 
   return (
-    <div className="min-h-screen bg-black text-gray-300 font-mono selection:bg-pink-500 selection:text-white">
-      <header className="border-b border-cyan-900/50">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-black text-gray-300 font-mono selection:bg-pink-500 selection:text-white pb-12">
+      <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/admin-dynamic" className="p-2 border border-cyan-800 text-cyan-500 hover:text-cyan-300 hover:border-cyan-500 transition-colors" title="Back to dashboard">
+            <Link href="/admin-dynamic" className="p-2 border border-cyan-900 text-cyan-400 hover:text-cyan-200 hover:border-cyan-500 transition-colors" title="Back to dashboard">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
               <h1 className="text-lg font-bold text-white uppercase tracking-widest flex items-center gap-2">
                 <Terminal className="w-5 h-5 text-cyan-400" /> Remote Install
               </h1>
-              <p className="text-xs text-cyan-700 font-mono">
+              <p className="text-xs text-cyan-600 font-mono">
                 {loadingLicense ? "Memuat data lisensi..." : license ? `${license.ip_address} · ${license.client_name}` : `IP tidak ditemukan: ${ipParam || "-"}`}
               </p>
             </div>
           </div>
           <button
             onClick={() => fetch("/api/auth/logout", { method: "POST" }).then(() => router.push("/login"))}
-            className="p-2 text-cyan-600 hover:text-cyan-300 transition-colors"
+            className="p-2 text-pink-500 hover:text-pink-300 transition-colors"
             title="Logout"
           >
             <LogOut className="w-4 h-4" />
@@ -169,15 +170,15 @@ function InstallPageInner() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-5xl mx-auto px-6 mt-8 space-y-6">
         {loadingLicense ? (
-          <div className="p-8 text-center text-cyan-800 animate-pulse border border-cyan-900/20 bg-gray-950">Memuat data lisensi...</div>
+          <div className="ui-panel p-8 text-center text-cyan-700 animate-pulse">Memuat data lisensi...</div>
         ) : !license ? (
-          <div className="p-8 text-center text-pink-500 border border-pink-900/30 bg-gray-950">Licence tidak ditemukan untuk IP {ipParam || "-"}.</div>
+          <div className="ui-panel p-8 text-center text-pink-500 border-pink-900/50">Licence tidak ditemukan untuk IP {ipParam || "-"}.</div>
         ) : (
           <>
-            <section className="border border-cyan-900/50 bg-gray-950 p-6">
-              <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-900/50 pb-2 mb-4">Informasi Target</h2>
+            <section className="ui-panel p-6">
+              <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-950 pb-2 mb-4">Informasi Target</h2>
 
               {formError && (
                 <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
@@ -186,51 +187,52 @@ function InstallPageInner() {
               )}
               {jobIsActive && (
                 <div className="mb-4 p-3 bg-yellow-950/20 border border-yellow-500/40 text-yellow-400 text-sm">
-                  Ada instalasi aktif (Job #{job.id}). Form dinonaktifkan sampai proses selesai.
+                  Ada instalasi aktif (Job #{job?.id}). Form dinonaktifkan sampai proses selesai.
                 </div>
               )}
 
               <form onSubmit={startInstall} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Domain</label>
+                  <label className="ui-label block mb-2">Domain</label>
                   <input
                     type="text"
                     value={formData.domain}
                     onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                     disabled={jobIsActive}
-                    className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm disabled:opacity-50"
+                    className="ui-input p-2 text-cyan-300 font-mono text-sm"
                     placeholder="node1.example.com"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">SSH Port</label>
+                  <label className="ui-label block mb-2">SSH Port</label>
                   <input
                     type="number"
                     value={formData.ssh_port}
                     onChange={(e) => setFormData({ ...formData, ssh_port: e.target.value })}
                     disabled={jobIsActive}
-                    className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm disabled:opacity-50"
+                    className="ui-input p-2 text-cyan-300 font-mono text-sm"
+                    required
                   />
                 </div>
                 <div className="md:col-span-3">
-                  <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Root Password</label>
+                  <label className="ui-label block mb-2">Root Password</label>
                   <input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     disabled={jobIsActive}
-                    className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm disabled:opacity-50"
+                    className="ui-input p-2 text-cyan-300 font-mono text-sm"
                     placeholder="••••••••"
                     required
                   />
-                  <p className="text-[10px] text-cyan-800 mt-1">Password dienkripsi (AES-256-GCM) dan tidak ditampilkan di log.</p>
+                  <p className="text-[10px] text-cyan-700 mt-1">Password dienkripsi (AES-256-GCM) dan tidak ditampilkan di log.</p>
                 </div>
                 <div className="md:col-span-3">
                   <button
                     type="submit"
                     disabled={starting || jobIsActive}
-                    className="w-full bg-cyan-950/50 border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-500 hover:text-black transition-colors disabled:opacity-50"
+                    className="w-full bg-cyan-950/60 border border-cyan-500 text-cyan-300 py-3 uppercase tracking-widest font-bold hover:bg-cyan-400 hover:text-black transition-colors disabled:opacity-40"
                   >
                     {starting ? "QUEUING..." : job ? "START NEW INSTALLATION" : "START INSTALLATION"}
                   </button>
@@ -239,8 +241,8 @@ function InstallPageInner() {
             </section>
 
             {job && (
-              <section className="border border-cyan-900/50 bg-black">
-                <div className="flex items-center justify-between border-b border-cyan-900/50 p-4">
+              <section className="ui-panel p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-cyan-950 pb-4">
                   <div className="flex items-center gap-3">
                     <Terminal className="w-4 h-4 text-cyan-400" />
                     <div>
@@ -248,10 +250,10 @@ function InstallPageInner() {
                       <p className="text-[10px] text-cyan-700 font-mono">Job #{job.id} · {job.domain}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${statusColor}`}>{jobStatus || job.status}</span>
+                  <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border font-bold ${statusColor}`}>{jobStatus || job.status}</span>
                 </div>
-                <div className="h-80 overflow-y-auto p-4 font-mono text-xs text-cyan-300 whitespace-pre-wrap bg-black">
-                  {jobLog || <span className="text-cyan-800 animate-pulse">Menunggu daemon mengambil job...</span>}
+                <div className="ui-panel-inset h-80 overflow-y-auto p-4 font-mono text-xs text-cyan-300 whitespace-pre-wrap select-text">
+                  {jobLog || <span className="text-cyan-700 animate-pulse">Menunggu daemon mengambil job...</span>}
                   <div ref={logEndRef} />
                 </div>
               </section>

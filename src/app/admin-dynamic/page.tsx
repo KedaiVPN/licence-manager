@@ -13,7 +13,7 @@ type License = {
   client_name: string;
   expired_date: string;
   status: "active" | "banned";
-  auth_key?: string; // Hidden in UI but present in type
+  auth_key?: string;
   tele_id?: string | null;
   label?: string;
   domain?: string | null;
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-black text-cyan-400 font-mono selection:bg-pink-500 selection:text-white pb-12">
-      {/* Background */}
+      {/* Background grid */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-10"
            style={{
              backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.2) 1px, transparent 1px),
@@ -215,24 +215,23 @@ export default function AdminDashboard() {
       </div>
 
       <div className="relative z-10">
-        {/* Top Navigation */}
-        <header className="border-b border-cyan-900/50 bg-black/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
               <Shield className="w-8 h-8 text-pink-500" />
               <div>
                 <h1 className="text-xl font-bold tracking-widest uppercase text-white">SYS<span className="text-pink-500">ADMIN</span></h1>
-                <p className="text-[10px] text-cyan-500 tracking-[0.2em] uppercase">Control Panel v2.0</p>
+                <p className="text-[10px] text-cyan-600 tracking-[0.2em] uppercase">Control Panel v2.0</p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <Link href="/" className="text-xs text-cyan-500 border border-cyan-900/50 px-3 py-2 hover:bg-cyan-900/30 transition-colors uppercase tracking-widest flex items-center gap-2">
+              <Link href="/" className="text-xs text-cyan-400 border border-cyan-900 px-3 py-2 hover:bg-cyan-950/40 transition-colors uppercase tracking-widest flex items-center gap-2">
                 <Activity className="w-4 h-4" /> Public view
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-xs text-pink-500 border border-pink-900/50 px-3 py-2 hover:bg-pink-900/30 transition-colors uppercase tracking-widest flex items-center gap-2"
+                className="text-xs text-pink-400 border border-pink-900 px-3 py-2 hover:bg-pink-950/40 transition-colors uppercase tracking-widest flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4" /> Terminate Session
               </button>
@@ -242,16 +241,16 @@ export default function AdminDashboard() {
 
         <main className="max-w-7xl mx-auto px-6 mt-8">
           {/* Tabs */}
-          <div className="flex gap-4 mb-8 border-b border-cyan-900/30 pb-4">
+          <div className="flex gap-4 mb-8 border-b border-cyan-950 pb-4">
             <button
               onClick={() => setActiveTab("licenses")}
-              className={`flex items-center gap-2 px-4 py-2 uppercase tracking-widest text-sm transition-colors ${activeTab === 'licenses' ? 'bg-cyan-900/40 text-cyan-300 border border-cyan-500' : 'text-cyan-700 hover:text-cyan-400'}`}
+              className={`flex items-center gap-2 px-4 py-2 uppercase tracking-widest text-sm transition-colors ${activeTab === 'licenses' ? 'bg-cyan-950/60 text-cyan-300 border border-cyan-500/60' : 'text-cyan-700 hover:text-cyan-400'}`}
             >
               <Server className="w-4 h-4" /> Node Registry
             </button>
             <button
               onClick={() => setActiveTab("webhooks")}
-              className={`flex items-center gap-2 px-4 py-2 uppercase tracking-widest text-sm transition-colors ${activeTab === 'webhooks' ? 'bg-pink-900/40 text-pink-300 border border-pink-500' : 'text-pink-700 hover:text-pink-400'}`}
+              className={`flex items-center gap-2 px-4 py-2 uppercase tracking-widest text-sm transition-colors ${activeTab === 'webhooks' ? 'bg-pink-950/60 text-pink-300 border border-pink-500/60' : 'text-pink-700 hover:text-pink-400'}`}
             >
               <AlertTriangle className="w-4 h-4" /> Webhook Fails
               {webhookLogs.length > 0 && activeTab !== 'webhooks' && (
@@ -260,7 +259,6 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {/* Licenses View */}
           {activeTab === "licenses" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -275,8 +273,8 @@ export default function AdminDashboard() {
 
               {/* Form Modal */}
               {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                  <div className="bg-gray-900 border border-cyan-500/50 p-6 shadow-[0_0_30px_rgba(6,182,212,0.2)] w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                  <div className="ui-panel p-6 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative bg-[#0a0a0c]">
                     <button
                       onClick={() => { setShowForm(false); resetForm(); }}
                       className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500 transition-colors"
@@ -284,208 +282,259 @@ export default function AdminDashboard() {
                       <X className="w-6 h-6" />
                     </button>
 
-                    <h3 className="text-lg font-bold text-cyan-400 mb-4 uppercase tracking-widest border-b border-cyan-900/50 pb-2 pr-8">
+                    <h3 className="text-lg font-bold text-cyan-400 mb-4 uppercase tracking-widest border-b border-cyan-950 pb-2 pr-8">
                       {isEditing ? "Modify Node Settings" : "Initialize New Node"}
                     </h3>
 
-                  {formError && (
-                    <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4" /> {formError}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">IPv4 Address</label>
-                      <input
-                        type="text"
-                        value={formData.ip_address}
-                        onChange={(e) => setFormData({...formData, ip_address: e.target.value})}
-                        disabled={isEditing}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none disabled:opacity-50 font-mono text-sm"
-                        placeholder="192.168.1.1"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Client Identifier</label>
-                      <input
-                        type="text"
-                        value={formData.client_name}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\s+/g, '-');
-                          setFormData({...formData, client_name: val});
-                        }}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        placeholder="Corp_Alpha"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Expiration Date</label>
-                      <input
-                        type="date"
-                        value={formData.expired_date}
-                        onChange={(e) => setFormData({...formData, expired_date: e.target.value})}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Auth Key <span className="text-gray-500 lowercase">(optional)</span></label>
-                      <input
-                        type="text"
-                        value={formData.auth_key}
-                        onChange={(e) => setFormData({...formData, auth_key: e.target.value})}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        placeholder="Leave blank for new installs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Telegram ID <span className="text-gray-500 lowercase">(optional)</span></label>
-                      <input
-                        type="text"
-                        value={formData.tele_id}
-                        onChange={(e) => setFormData({...formData, tele_id: e.target.value})}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        placeholder="e.g. 123456789"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Label</label>
-                      <select
-                        value={formData.label}
-                        onChange={(e) => setFormData({...formData, label: e.target.value})}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                        required
-                      >
-                        <option value="" disabled>PILIH LABEL</option>
-                        <option value="zivpn">ZIVPN</option>
-                        <option value="tunneling">TUNNELING</option>
-                      </select>
-                    </div>
-
-                    <div className="md:col-span-2 flex items-center mt-2 mb-2 bg-black border border-cyan-800 p-3 rounded">
-                      <input
-                        type="checkbox"
-                        id="monitoringToggle"
-                        checked={formData.is_monitoring_enabled}
-                        onChange={(e) => setFormData({...formData, is_monitoring_enabled: e.target.checked})}
-                        className="w-5 h-5 accent-cyan-500 mr-3 cursor-pointer"
-                      />
-                      <label htmlFor="monitoringToggle" className="text-sm font-bold uppercase tracking-wider text-cyan-400 cursor-pointer">
-                        Aktifkan Monitoring Publik
-                      </label>
-                    </div>
-
-                    {formData.is_monitoring_enabled && (
-                      <div className="md:col-span-2">
-                        <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Domain Server <span className="text-pink-500">*</span></label>
-                        <input
-                          type="text"
-                          value={formData.domain}
-                          onChange={(e) => setFormData({...formData, domain: e.target.value})}
-                          className="w-full bg-black border border-pink-500/50 p-2 text-cyan-300 focus:border-pink-400 focus:outline-none font-mono text-sm shadow-[0_0_10px_rgba(236,72,153,0.1)]"
-                          placeholder="node1.example.com"
-                          required={formData.is_monitoring_enabled}
-                        />
+                    {formError && (
+                      <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" /> {formError}
                       </div>
                     )}
 
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Status</label>
-                      <select
-                        value={formData.status}
-                        onChange={(e) => setFormData({...formData, status: e.target.value as "active" | "banned"})}
-                        className="w-full bg-black border border-cyan-800 p-2 text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono text-sm"
-                      >
-                        <option value="active">ACTIVE</option>
-                        <option value="banned">BANNED</option>
-                      </select>
-                    </div>
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="ui-label block mb-2">IPv4 Address</label>
+                        <input
+                          type="text"
+                          value={formData.ip_address}
+                          onChange={(e) => setFormData({...formData, ip_address: e.target.value})}
+                          disabled={isEditing}
+                          className="ui-input p-2 font-mono text-sm"
+                          placeholder="192.168.1.1"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="ui-label block mb-2">Client Identifier</label>
+                        <input
+                          type="text"
+                          value={formData.client_name}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\s+/g, '-');
+                            setFormData({...formData, client_name: val});
+                          }}
+                          className="ui-input p-2 font-mono text-sm"
+                          placeholder="Corp_Alpha"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="ui-label block mb-2">Expiration Date</label>
+                        <input
+                          type="date"
+                          value={formData.expired_date}
+                          onChange={(e) => setFormData({...formData, expired_date: e.target.value})}
+                          className="ui-input p-2 font-mono text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="ui-label block mb-2">Auth Key <span className="text-gray-500 lowercase">(optional)</span></label>
+                        <input
+                          type="text"
+                          value={formData.auth_key}
+                          onChange={(e) => setFormData({...formData, auth_key: e.target.value})}
+                          className="ui-input p-2 font-mono text-sm"
+                          placeholder="Leave blank for new installs"
+                        />
+                      </div>
+                      <div>
+                        <label className="ui-label block mb-2">Telegram ID <span className="text-gray-500 lowercase">(optional)</span></label>
+                        <input
+                          type="text"
+                          value={formData.tele_id}
+                          onChange={(e) => setFormData({...formData, tele_id: e.target.value})}
+                          className="ui-input p-2 font-mono text-sm"
+                          placeholder="e.g. 123456789"
+                        />
+                      </div>
 
-                    <div className="md:col-span-2 pt-4 border-t border-cyan-900/50">
-                      <button
-                        type="submit"
-                        disabled={actionLoading}
-                        className="w-full bg-cyan-950/50 border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-500 hover:text-black transition-colors disabled:opacity-50"
-                      >
-                        {actionLoading ? "PROCESSING..." : isEditing ? "EXECUTE UPDATE" : "DEPLOY NODE"}
-                      </button>
-                    </div>
-                  </form>
+                      <div>
+                        <label className="ui-label block mb-2">Label</label>
+                        <select
+                          value={formData.label}
+                          onChange={(e) => setFormData({...formData, label: e.target.value})}
+                          className="ui-input p-2 font-mono text-sm bg-black"
+                          required
+                        >
+                          <option value="" disabled>PILIH LABEL</option>
+                          <option value="zivpn">ZIVPN</option>
+                          <option value="tunneling">TUNNELING</option>
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-2 flex items-center mt-2 mb-2 ui-panel-inset p-3">
+                        <input
+                          type="checkbox"
+                          id="monitoringToggle"
+                          checked={formData.is_monitoring_enabled}
+                          onChange={(e) => setFormData({...formData, is_monitoring_enabled: e.target.checked})}
+                          className="w-5 h-5 accent-cyan-500 mr-3 cursor-pointer"
+                        />
+                        <label htmlFor="monitoringToggle" className="text-sm font-bold uppercase tracking-wider text-cyan-400 cursor-pointer">
+                          Aktifkan Monitoring Publik
+                        </label>
+                      </div>
+
+                      {formData.is_monitoring_enabled && (
+                        <div className="md:col-span-2">
+                          <label className="ui-label block mb-2">Domain Server <span className="text-pink-500">*</span></label>
+                          <input
+                            type="text"
+                            value={formData.domain}
+                            onChange={(e) => setFormData({...formData, domain: e.target.value})}
+                            className="ui-input p-2 text-cyan-300 font-mono text-sm border-pink-500/50"
+                            placeholder="node1.example.com"
+                            required={formData.is_monitoring_enabled}
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="ui-label block mb-2">Status</label>
+                        <select
+                          value={formData.status}
+                          onChange={(e) => setFormData({...formData, status: e.target.value as "active" | "banned"})}
+                          className="ui-input p-2 font-mono text-sm bg-black"
+                        >
+                          <option value="active">ACTIVE</option>
+                          <option value="banned">BANNED</option>
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-2 pt-4 border-t border-cyan-950">
+                        <button
+                          type="submit"
+                          disabled={actionLoading}
+                          className="w-full bg-cyan-950/60 border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-400 hover:text-black transition-colors disabled:opacity-50"
+                        >
+                          {actionLoading ? "PROCESSING..." : isEditing ? "EXECUTE UPDATE" : "DEPLOY NODE"}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}
 
-              {/* Data Table */}
-              <div className="overflow-x-auto border border-cyan-900/50 bg-gray-950">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-cyan-950/30 text-cyan-600 text-xs uppercase tracking-wider border-b border-cyan-900/50">
-                    <tr>
-                      <th className="p-4">IP Address</th>
-                      <th className="p-4">Client Name</th>
-                      <th className="p-4">Tele ID</th>
-                      <th className="p-4">Expiration</th>
-                      <th className="p-4">Label</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-cyan-900/20">
-                    {isLoading ? (
-                      <tr><td colSpan={6} className="p-8 text-center text-cyan-800 animate-pulse">Loading node data...</td></tr>
-                    ) : licenses.length === 0 ? (
-                      <tr><td colSpan={6} className="p-8 text-center text-cyan-800">No nodes found in database.</td></tr>
-                    ) : (
-                      licenses.map((license) => (
-                        <tr key={license.ip_address} className="hover:bg-cyan-900/10 transition-colors">
-                          <td className="p-4 text-cyan-300 font-mono">{license.ip_address}</td>
-                          <td className="p-4 text-gray-300">{license.client_name}</td>
-                          <td className="p-4 text-gray-500 font-mono text-xs">{license.tele_id || "-"}</td>
-                          <td className="p-4 text-gray-400">{license.expired_date}</td>
-                          <td className="p-4 text-cyan-400 font-mono text-xs uppercase">{license.label || "-"}</td>
-                          <td className="p-4">
-                            <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${
-                              license.status === 'active'
-                                ? 'border-cyan-500/50 text-cyan-400 bg-cyan-950/30'
-                                : 'border-pink-500/50 text-pink-400 bg-pink-950/30'
-                            }`}>
-                              {license.status}
-                            </span>
-                          </td>
-                          <td className="p-4 flex justify-end gap-2">
-                            {license.status === "active" && (
-                              <Link
-                                href={`/admin-dynamic/install?ip=${encodeURIComponent(license.ip_address)}`}
-                                className="p-2 text-cyan-600 hover:text-cyan-300 hover:bg-cyan-900/30 transition-colors border border-transparent hover:border-cyan-800"
-                                title="Install Dynamic Script"
-                              >
-                                <Terminal className="w-4 h-4" />
-                              </Link>
-                            )}
-                            <button
-                              onClick={() => editLicense(license)}
-                              className="p-2 text-cyan-600 hover:text-cyan-400 hover:bg-cyan-900/30 transition-colors border border-transparent hover:border-cyan-800"
-                              title="Edit Node"
+              {/* Data Table / Mobile Card List */}
+              {isLoading ? (
+                <div className="ui-panel p-12 text-center text-cyan-700 animate-pulse">Scanning node database...</div>
+              ) : licenses.length === 0 ? (
+                <div className="ui-panel p-12 text-center text-cyan-800">No nodes found in database.</div>
+              ) : (
+                <>
+                  {/* Mobile Card List (< md) */}
+                  <div className="md:hidden space-y-4">
+                    {licenses.map((license) => (
+                      <div key={license.ip_address} className="ui-panel p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="text-white font-bold">{license.client_name}</div>
+                            <div className="text-xs text-cyan-400 font-mono mt-0.5">{license.ip_address}</div>
+                          </div>
+                          <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider border ${
+                            license.status === 'active'
+                              ? 'border-cyan-500/50 text-cyan-400 bg-cyan-950/30'
+                              : 'border-pink-500/50 text-pink-400 bg-pink-950/30'
+                          }`}>
+                            {license.status}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 text-xs text-gray-400 gap-1 pt-2 border-t border-cyan-950">
+                          <div>Exp: <span className="text-white">{license.expired_date}</span></div>
+                          <div>Label: <span className="text-cyan-400 uppercase">{license.label || "-"}</span></div>
+                          {license.tele_id && <div className="col-span-2">Tele ID: <span className="text-gray-300 font-mono">{license.tele_id}</span></div>}
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t border-cyan-950">
+                          {license.status === "active" && (
+                            <Link
+                              href={`/admin-dynamic/install?ip=${encodeURIComponent(license.ip_address)}`}
+                              className="flex-1 text-center py-2 bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold"
                             >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(license.ip_address)}
-                              className="p-2 text-pink-700 hover:text-pink-400 hover:bg-pink-900/30 transition-colors border border-transparent hover:border-pink-800"
-                              title="Delete Node"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
+                              Install
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => editLicense(license)}
+                            className="px-3 py-2 border border-cyan-800 text-cyan-400 text-xs uppercase"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(license.ip_address)}
+                            className="px-3 py-2 border border-pink-900 text-pink-400 text-xs uppercase"
+                          >
+                            Del
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table (md+) */}
+                  <div className="hidden md:block overflow-x-auto ui-panel">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-cyan-950/30 text-cyan-600 text-xs uppercase tracking-wider border-b border-cyan-950">
+                        <tr>
+                          <th className="p-4">IP Address</th>
+                          <th className="p-4">Client Name</th>
+                          <th className="p-4">Tele ID</th>
+                          <th className="p-4">Expiration</th>
+                          <th className="p-4">Label</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 text-right">Actions</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      </thead>
+                      <tbody className="divide-y divide-cyan-950/60">
+                        {licenses.map((license) => (
+                          <tr key={license.ip_address} className="hover:bg-cyan-950/20 transition-colors">
+                            <td className="p-4 text-cyan-300 font-mono">{license.ip_address}</td>
+                            <td className="p-4 text-gray-200 font-bold">{license.client_name}</td>
+                            <td className="p-4 text-gray-500 font-mono text-xs">{license.tele_id || "-"}</td>
+                            <td className="p-4 text-gray-400">{license.expired_date}</td>
+                            <td className="p-4 text-cyan-400 font-mono text-xs uppercase">{license.label || "-"}</td>
+                            <td className="p-4">
+                              <span className={`px-2 py-1 text-[10px] uppercase tracking-wider border ${
+                                license.status === 'active'
+                                  ? 'border-cyan-500/50 text-cyan-400 bg-cyan-950/30'
+                                  : 'border-pink-500/50 text-pink-400 bg-pink-950/30'
+                              }`}>
+                                {license.status}
+                              </span>
+                            </td>
+                            <td className="p-4 flex justify-end gap-2">
+                              {license.status === "active" && (
+                                <Link
+                                  href={`/admin-dynamic/install?ip=${encodeURIComponent(license.ip_address)}`}
+                                  className="p-2 text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950 transition-colors border border-cyan-900"
+                                  title="Install Dynamic Script"
+                                >
+                                  <Terminal className="w-4 h-4" />
+                                </Link>
+                              )}
+                              <button
+                                onClick={() => editLicense(license)}
+                                className="p-2 text-cyan-400 hover:text-cyan-200 hover:bg-cyan-950 transition-colors border border-cyan-900"
+                                title="Edit Node"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(license.ip_address)}
+                                className="p-2 text-pink-500 hover:text-pink-300 hover:bg-pink-950/30 transition-colors border border-pink-900"
+                                title="Delete Node"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -497,7 +546,7 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-white uppercase tracking-wider flex items-center gap-3">
                     Webhook Diagnostics
                   </h2>
-                  <p className="text-sm text-pink-600 mt-1">Logs of failed sync attempts with target VPS nodes.</p>
+                  <p className="text-sm text-pink-500 mt-1">Logs of failed sync attempts with target VPS nodes.</p>
                 </div>
                 {webhookLogs.length > 0 && (
                   <button
@@ -511,24 +560,20 @@ export default function AdminDashboard() {
 
               <div className="space-y-4">
                 {isLoading ? (
-                  <div className="p-8 text-center text-pink-800 animate-pulse border border-pink-900/20 bg-gray-950">
-                    Scanning diagnostic logs...
-                  </div>
+                  <div className="ui-panel p-8 text-center text-pink-600 animate-pulse">Scanning diagnostic logs...</div>
                 ) : webhookLogs.length === 0 ? (
-                  <div className="p-8 text-center text-cyan-800 border border-cyan-900/20 bg-gray-950">
-                    System nominal. No failed webhooks detected.
-                  </div>
+                  <div className="ui-panel p-8 text-center text-cyan-700">System nominal. No failed webhooks detected.</div>
                 ) : (
                   webhookLogs.map((log) => {
                     const payload = JSON.parse(log.payload);
                     return (
-                      <div key={log.id} className="border border-pink-900/50 bg-gray-950 p-4 hover:border-pink-500/50 transition-colors flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                      <div key={log.id} className="ui-panel p-4 hover:border-pink-500/50 transition-colors flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <span className="text-pink-400 font-bold font-mono">{log.ip_address}</span>
                             <span className="text-xs text-gray-500">{new Date(log.created_at).toLocaleString()}</span>
                           </div>
-                          <div className="text-sm text-pink-600 bg-pink-950/20 p-2 border border-pink-900/30 font-mono">
+                          <div className="text-sm text-pink-400 bg-pink-950/20 p-2 border border-pink-900/40 font-mono">
                             Error: {log.error_message}
                           </div>
                           <div className="text-xs text-gray-400 flex gap-4">
@@ -540,7 +585,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => retryWebhook(log.id)}
                           disabled={actionLoading}
-                          className="w-full md:w-auto bg-transparent border border-cyan-500 text-cyan-400 px-6 py-2 uppercase tracking-widest text-sm hover:bg-cyan-950 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                          className="w-full md:w-auto ui-control px-6 py-2 uppercase tracking-widest text-sm text-cyan-400 flex items-center justify-center gap-2"
                         >
                           <RefreshCw className={`w-4 h-4 ${actionLoading ? 'animate-spin' : ''}`} />
                           Execute Retry
@@ -552,8 +597,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
-
-    </main>
+        </main>
       </div>
     </div>
   );

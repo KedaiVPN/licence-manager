@@ -25,7 +25,7 @@ interface StreamData {
 const CustomTooltip = ({ active, payload, label }: { active?: boolean, payload?: any[], label?: string }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-gray-900 border border-cyan-500/50 p-3 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+      <div className="ui-panel p-3 bg-[#0a0a0c] shadow-xl">
         <p className="text-gray-400 text-xs mb-2">{label}</p>
         {payload.map((entry: { color: string, name: string, value: number }, index: number) => (
           <div key={index} className="flex items-center space-x-2 text-sm">
@@ -53,7 +53,6 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
     let reconnectTimeout: NodeJS.Timeout;
 
     const connectSSE = () => {
-      // Connect directly to the VPS domain
       eventSource = new EventSource(`https://${domain}/api/monitoring/stream`);
 
       eventSource.onopen = () => {
@@ -64,7 +63,6 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
       eventSource.onmessage = (event) => {
         try {
           const parsed = JSON.parse(event.data);
-
           const now = new Date();
           const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
@@ -82,10 +80,8 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
           };
 
           setLatestData(newData);
-
           setDataBuffer(prev => {
             const newBuffer = [...prev, newData];
-            // Keep last 20 data points
             if (newBuffer.length > 20) {
               return newBuffer.slice(newBuffer.length - 20);
             }
@@ -101,8 +97,6 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
         eventSource?.close();
         setIsConnected(false);
         setError("Connection to telemetry stream lost. Attempting to reconnect...");
-
-        // Try to reconnect after 5 seconds
         reconnectTimeout = setTimeout(connectSSE, 5000);
       };
     };
@@ -124,8 +118,6 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
     return `${days}d ${hours}h ${mins}m`;
   };
 
-
-
   return (
     <div className="space-y-6">
       {/* Status Bar */}
@@ -145,9 +137,8 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gray-950 border border-gray-800 p-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 blur-xl rounded-full"></div>
-          <div className="flex items-center space-x-2 mb-2 text-cyan-600">
+        <div className="ui-panel p-4 relative overflow-hidden">
+          <div className="flex items-center space-x-2 mb-2 text-cyan-400">
             <Cpu className="w-4 h-4" />
             <span className="text-xs uppercase tracking-wider font-bold">CPU Load</span>
           </div>
@@ -156,9 +147,8 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
           </div>
         </div>
 
-        <div className="bg-gray-950 border border-gray-800 p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-pink-500/5 blur-xl rounded-full"></div>
-          <div className="flex items-center space-x-2 mb-2 text-pink-600">
+        <div className="ui-panel p-4 relative overflow-hidden">
+          <div className="flex items-center space-x-2 mb-2 text-pink-400">
             <Memory className="w-4 h-4" />
             <span className="text-xs uppercase tracking-wider font-bold">Memory</span>
           </div>
@@ -170,9 +160,8 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
           </div>
         </div>
 
-        <div className="bg-gray-950 border border-gray-800 p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 blur-xl rounded-full"></div>
-          <div className="flex items-center space-x-2 mb-2 text-purple-600">
+        <div className="ui-panel p-4 relative overflow-hidden">
+          <div className="flex items-center space-x-2 mb-2 text-cyan-300">
             <Activity className="w-4 h-4" />
             <span className="text-xs uppercase tracking-wider font-bold">Bandwidth</span>
           </div>
@@ -184,9 +173,8 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
           </div>
         </div>
 
-        <div className="bg-gray-950 border border-gray-800 p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/5 blur-xl rounded-full"></div>
-          <div className="flex items-center space-x-2 mb-2 text-green-600">
+        <div className="ui-panel p-4 relative overflow-hidden">
+          <div className="flex items-center space-x-2 mb-2 text-green-400">
             <Clock className="w-4 h-4" />
             <span className="text-xs uppercase tracking-wider font-bold">Uptime</span>
           </div>
@@ -199,10 +187,10 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* System Load Chart */}
-        <div className="bg-gray-950 border border-gray-800 p-4">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center">
+        <div className="ui-panel p-4">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-cyan-400 mb-6 flex items-center">
             <div className="w-1 h-4 bg-cyan-500 mr-2"></div>
-            System Load (CPU/RAM)
+            System Load (CPU / RAM)
           </h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -217,9 +205,9 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
                     <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="time" stroke="#4b5563" fontSize={10} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#4b5563" fontSize={10} domain={[0, 100]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2c2c2c" vertical={false} />
+                <XAxis dataKey="time" stroke="#8b949e" fontSize={10} tickMargin={10} minTickGap={30} />
+                <YAxis stroke="#8b949e" fontSize={10} domain={[0, 100]} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area type="monotone" dataKey="cpu_usage" name="CPU" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" isAnimationActive={false} />
                 <Area type="monotone" dataKey="ram_percentage" name="RAM" stroke="#ec4899" strokeWidth={2} fillOpacity={1} fill="url(#colorRam)" isAnimationActive={false} />
@@ -229,9 +217,9 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
         </div>
 
         {/* Network Chart */}
-        <div className="bg-gray-950 border border-gray-800 p-4">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center">
-            <div className="w-1 h-4 bg-purple-500 mr-2"></div>
+        <div className="ui-panel p-4">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-cyan-400 mb-6 flex items-center">
+            <div className="w-1 h-4 bg-cyan-500 mr-2"></div>
             Network Throughput
           </h3>
           <div className="h-[300px] w-full">
@@ -239,19 +227,19 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
               <AreaChart data={dataBuffer} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRx" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorTx" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#eab308" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#eab308" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="time" stroke="#4b5563" fontSize={10} tickMargin={10} minTickGap={30} />
-                <YAxis stroke="#4b5563" fontSize={10} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2c2c2c" vertical={false} />
+                <XAxis dataKey="time" stroke="#8b949e" fontSize={10} tickMargin={10} minTickGap={30} />
+                <YAxis stroke="#8b949e" fontSize={10} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="net_rx_mbps" name="Download (Mbps)" stroke="#a855f7" strokeWidth={2} fillOpacity={1} fill="url(#colorRx)" isAnimationActive={false} />
+                <Area type="monotone" dataKey="net_rx_mbps" name="Download (Mbps)" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorRx)" isAnimationActive={false} />
                 <Area type="monotone" dataKey="net_tx_mbps" name="Upload (Mbps)" stroke="#eab308" strokeWidth={2} fillOpacity={1} fill="url(#colorTx)" isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>

@@ -36,8 +36,7 @@ export default async function MonitoringPage({ params }: PageProps) {
   if (!isEnabled || !domain) {
     return (
       <div className="min-h-screen bg-black text-white font-mono flex items-center justify-center p-6 selection:bg-pink-500 selection:text-white">
-        {/* Background */}
-        <div className="fixed inset-0 z-0 pointer-events-none opacity-20"
+        <div className="fixed inset-0 z-0 pointer-events-none opacity-10"
             style={{
               backgroundImage: `linear-gradient(rgba(236, 72, 153, 0.2) 1px, transparent 1px),
                                 linear-gradient(90deg, rgba(236, 72, 153, 0.2) 1px, transparent 1px)`,
@@ -45,14 +44,14 @@ export default async function MonitoringPage({ params }: PageProps) {
             }}>
         </div>
 
-        <div className="relative z-10 text-center max-w-md bg-gray-950 p-8 border border-pink-500/50 shadow-[0_0_30px_rgba(236,72,153,0.15)]">
-          <div className="text-pink-500 text-6xl mb-4 font-black">403</div>
-          <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-400 mb-2">Access Denied</h1>
-          <p className="text-gray-400 text-sm">
+        <div className="ui-panel relative z-10 text-center max-w-md p-8 border-pink-900/60">
+          <div className="text-pink-500 text-5xl mb-4 font-bold">403</div>
+          <h1 className="text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">Access Denied</h1>
+          <p className="text-gray-400 text-sm leading-relaxed">
             Monitoring data for <span className="text-cyan-400 font-bold">{client_name}</span> is either disabled or the node does not exist in the public registry.
           </p>
           <div className="mt-8">
-            <Link href="/" className="inline-block border border-cyan-500 text-cyan-400 px-6 py-2 uppercase tracking-widest text-xs hover:bg-cyan-950/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
+            <Link href="/" className="inline-block border border-cyan-500 text-cyan-400 px-6 py-2 uppercase tracking-widest text-xs hover:bg-cyan-950/50 transition-colors">
               Return to Grid
             </Link>
           </div>
@@ -62,8 +61,7 @@ export default async function MonitoringPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono selection:bg-cyan-500 selection:text-black">
-      {/* Background */}
+    <div className="min-h-screen bg-black text-white font-mono selection:bg-pink-500 selection:text-white pb-12">
       <div className="fixed inset-0 z-0 opacity-10 pointer-events-none"
            style={{
              backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.2) 1px, transparent 1px),
@@ -73,29 +71,29 @@ export default async function MonitoringPage({ params }: PageProps) {
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <header className="border-b border-cyan-900/50 bg-black/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-xl md:text-2xl font-black tracking-tighter">
-              <span className="text-gray-500">NODE/</span>
+            <h1 className="text-xl md:text-2xl font-bold tracking-wider uppercase">
+              <span className="text-gray-600">NODE/</span>
               <span className="text-cyan-400">{client_name}</span>
             </h1>
-            <Link href="/" className="text-xs border border-cyan-800 text-cyan-600 px-3 py-1.5 uppercase hover:text-cyan-400 hover:border-cyan-500 transition-colors">
+            <Link href="/" className="text-xs border border-cyan-900 text-cyan-500 px-3 py-2 uppercase tracking-wider hover:text-cyan-300 hover:border-cyan-500 transition-colors">
               Back to Registry
             </Link>
           </div>
         </header>
 
-        <main className="flex-grow w-full max-w-6xl mx-auto px-6 py-8">
-          <div className="mb-6 border-b border-gray-800 pb-2 flex justify-between items-end">
+        <main className="flex-grow w-full max-w-6xl mx-auto px-6 mt-8">
+          <div className="mb-6 border-b border-cyan-950 pb-3 flex justify-between items-end gap-4">
             <div>
-              <h2 className="text-2xl font-bold uppercase text-white tracking-widest">Live Telemetry</h2>
+              <h2 className="text-xl md:text-2xl font-bold uppercase text-white tracking-widest">Live Telemetry</h2>
               <div className="text-xs text-cyan-600 mt-1 uppercase tracking-widest font-bold">
                 Source: {domain}
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,1)] animate-pulse"></div>
-              <span className="text-xs text-cyan-400 uppercase tracking-widest font-bold">Streaming</span>
+            <div className="flex items-center space-x-2 shrink-0">
+              <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.9)] animate-pulse"></div>
+              <span className="text-xs text-green-400 uppercase tracking-widest font-bold">Streaming</span>
             </div>
           </div>
 

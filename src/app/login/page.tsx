@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Terminal, Lock } from "lucide-react";
 
 export default function LoginPage() {
@@ -39,25 +40,24 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black text-cyan-400 font-mono flex items-center justify-center p-6 selection:bg-pink-500 selection:text-white">
-      {/* Background elements */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-20"
+      {/* Background grid */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-10"
            style={{
              backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
                                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)`,
-             backgroundSize: '20px 20px'
+             backgroundSize: '24px 24px'
            }}>
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="border border-cyan-500/50 bg-black/80 p-8 shadow-[0_0_15px_rgba(6,182,212,0.3)] relative overflow-hidden backdrop-blur-sm">
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-500"></div>
+        <div className="ui-panel p-8 relative overflow-hidden bg-[#0a0a0c] shadow-2xl">
+          <div className="absolute top-0 left-0 w-full h-px bg-cyan-400"></div>
 
           <div className="flex flex-col items-center mb-8">
-            <div className="p-4 rounded-full bg-cyan-950/50 border border-cyan-800 mb-4 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+            <div className="p-4 bg-cyan-950/40 border border-cyan-900 mb-4">
               <Terminal className="w-8 h-8 text-cyan-400" />
             </div>
-            <h1 className="text-2xl font-bold tracking-widest uppercase">SYS<span className="text-pink-500">ADMIN</span></h1>
+            <h1 className="text-2xl font-bold tracking-widest uppercase text-white">SYS<span className="text-pink-500">ADMIN</span></h1>
             <p className="text-xs text-cyan-700 mt-2 tracking-widest">AUTHORIZED PERSONNEL ONLY</p>
           </div>
 
@@ -70,27 +70,29 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Identifier</label>
+              <label className="ui-label block mb-2">Identifier</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-cyan-950/20 border border-cyan-800 p-3 text-cyan-300 focus:outline-none focus:border-cyan-400 focus:bg-cyan-950/40 transition-colors placeholder:text-cyan-800/50"
+                className="ui-input p-3 text-cyan-300"
                 placeholder="admin@system.local"
                 required
+                autoComplete="email"
               />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-cyan-600 mb-2">Access Key</label>
+              <label className="ui-label block mb-2">Access Key</label>
               <div className="relative">
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-cyan-950/20 border border-cyan-800 p-3 pl-10 text-cyan-300 focus:outline-none focus:border-cyan-400 focus:bg-cyan-950/40 transition-colors placeholder:text-cyan-800/50"
+                  className="ui-input p-3 pl-10 text-cyan-300"
                   placeholder="••••••••••••"
                   required
+                  autoComplete="current-password"
                 />
                 <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-700" />
               </div>
@@ -99,17 +101,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-4 bg-transparent border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-500 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+              className="w-full bg-cyan-950/60 border border-cyan-500 text-cyan-300 py-3 uppercase tracking-widest font-bold hover:bg-cyan-400 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="relative z-10">{isLoading ? "AUTHENTICATING..." : "INITIALIZE SESSION"}</span>
-              <div className="absolute inset-0 bg-cyan-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0"></div>
+              {isLoading ? "AUTHENTICATING..." : "INITIALIZE SESSION"}
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-cyan-900/50 pt-4">
-            <a href="/" className="text-xs text-cyan-700 hover:text-cyan-400 uppercase tracking-wider flex items-center justify-center gap-1">
+          <div className="mt-8 text-center border-t border-cyan-950 pt-4">
+            <Link href="/" className="text-xs text-cyan-700 hover:text-cyan-400 uppercase tracking-wider flex items-center justify-center gap-1">
               <span className="text-pink-500">&larr;</span> Return to Dashboard
-            </a>
+            </Link>
           </div>
         </div>
       </div>
