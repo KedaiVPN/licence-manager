@@ -1,6 +1,5 @@
 import { db, initDb } from "@/lib/db";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import ServerMonitor from "./ServerMonitor";
 
 interface PageProps {
@@ -51,9 +50,9 @@ export default async function MonitoringPage({ params }: PageProps) {
             Monitoring data for <span className="text-cyan-400 font-bold">{client_name}</span> is either disabled or the node does not exist in the public registry.
           </p>
           <div className="mt-8">
-            <Link href="/" className="inline-block border border-cyan-500 text-cyan-400 px-6 py-2 uppercase tracking-widest text-xs hover:bg-cyan-950/50 transition-colors">
+            <a href="/" className="inline-block border border-cyan-500 text-cyan-400 px-6 py-2 uppercase tracking-widest text-xs hover:bg-cyan-950/50 transition-colors">
               Return to Grid
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -72,14 +71,11 @@ export default async function MonitoringPage({ params }: PageProps) {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="max-w-6xl mx-auto px-6 py-4">
             <h1 className="text-xl md:text-2xl font-bold tracking-wider uppercase">
               <span className="text-gray-600">NODE/</span>
               <span className="text-cyan-400">{client_name}</span>
             </h1>
-            <Link href="/" className="text-xs border border-cyan-900 text-cyan-500 px-3 py-2 uppercase tracking-wider hover:text-cyan-300 hover:border-cyan-500 transition-colors">
-              Back to Registry
-            </Link>
           </div>
         </header>
 
@@ -87,9 +83,6 @@ export default async function MonitoringPage({ params }: PageProps) {
           <div className="mb-6 border-b border-cyan-950 pb-3 flex justify-between items-end gap-4">
             <div>
               <h2 className="text-xl md:text-2xl font-bold uppercase text-white tracking-widest">Live Telemetry</h2>
-              <div className="text-xs text-cyan-600 mt-1 uppercase tracking-widest font-bold">
-                Source: {domain}
-              </div>
             </div>
             <div className="flex items-center space-x-2 shrink-0">
               <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.9)] animate-pulse"></div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Cpu, MemoryStick as Memory, Activity, Globe, Clock } from "lucide-react";
+import { Globe } from "lucide-react";
 
 interface ServerMonitorProps {
   domain: string;
@@ -135,51 +135,96 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
         )}
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="ui-panel p-4 relative overflow-hidden">
-          <div className="flex items-center space-x-2 mb-2 text-cyan-400">
-            <Cpu className="w-4 h-4" />
-            <span className="text-xs uppercase tracking-wider font-bold">CPU Load</span>
+      {/* Metrics Grid — Terminal-Professional */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* CPU Load */}
+        <div className="ui-panel p-3 relative overflow-hidden">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">CPU Load</div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-white font-mono">{latestData ? latestData.cpu_usage.toFixed(1) : '--'}</span>
+            <span className="text-sm text-gray-500">%</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono">
-            {latestData ? `${latestData.cpu_usage.toFixed(1)}%` : '--'}
+          {/* Progress bar */}
+          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+            <div 
+              className="h-full rounded-sm transition-all duration-500"
+              style={{ 
+                width: latestData ? `${Math.min(latestData.cpu_usage, 100)}%` : '0%',
+                backgroundColor: latestData 
+                  ? latestData.cpu_usage > 80 ? '#ef4444' 
+                  : latestData.cpu_usage > 60 ? '#f59e0b' 
+                  : '#22c55e'
+                  : '#22c55e'
+              }}
+            />
           </div>
-        </div>
-
-        <div className="ui-panel p-4 relative overflow-hidden">
-          <div className="flex items-center space-x-2 mb-2 text-pink-400">
-            <Memory className="w-4 h-4" />
-            <span className="text-xs uppercase tracking-wider font-bold">Memory</span>
-          </div>
-          <div className="text-2xl font-black text-white font-mono">
-            {latestData ? `${latestData.ram_used.toFixed(0)} MB` : '--'}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            of {latestData ? `${latestData.ram_total.toFixed(0)} MB` : '--'}
-          </div>
-        </div>
-
-        <div className="ui-panel p-4 relative overflow-hidden">
-          <div className="flex items-center space-x-2 mb-2 text-cyan-300">
-            <Activity className="w-4 h-4" />
-            <span className="text-xs uppercase tracking-wider font-bold">Bandwidth</span>
-          </div>
-          <div className="text-2xl font-black text-white font-mono">
-            {latestData ? `${latestData.bandwidth_daily_gb} GB` : '--'}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Today
+          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
+            {latestData 
+              ? latestData.cpu_usage > 80 ? 'Critical' 
+              : latestData.cpu_usage > 60 ? 'Warning' 
+              : 'Normal'
+              : '—'}
           </div>
         </div>
 
-        <div className="ui-panel p-4 relative overflow-hidden">
-          <div className="flex items-center space-x-2 mb-2 text-green-400">
-            <Clock className="w-4 h-4" />
-            <span className="text-xs uppercase tracking-wider font-bold">Uptime</span>
+        {/* Memory */}
+        <div className="ui-panel p-3 relative overflow-hidden">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Memory</div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-white font-mono">{latestData ? Math.round(latestData.ram_used) : '--'}</span>
+            <span className="text-sm text-gray-500">MB</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono text-sm md:text-xl md:mt-1">
-            {latestData ? formatUptime(latestData.uptime) : '--'}
+          {/* Progress bar */}
+          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+            <div 
+              className="h-full rounded-sm transition-all duration-500"
+              style={{ 
+                width: latestData ? `${Math.min(latestData.ram_percentage, 100)}%` : '0%',
+                backgroundColor: latestData 
+                  ? latestData.ram_percentage > 90 ? '#ef4444' 
+                  : latestData.ram_percentage > 75 ? '#f59e0b' 
+                  : '#a855f7'
+                  : '#a855f7'
+              }}
+            />
+          </div>
+          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
+            {latestData 
+              ? `${latestData.ram_percentage.toFixed(0)}% of ${Math.round(latestData.ram_total)} MB`
+              : '—'}
+          </div>
+        </div>
+
+        {/* Bandwidth */}
+        <div className="ui-panel p-3 relative overflow-hidden">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Bandwidth</div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-white font-mono">{latestData ? latestData.bandwidth_daily_gb : '--'}</span>
+            <span className="text-sm text-gray-500">GB</span>
+          </div>
+          {/* Visual bar placeholder */}
+          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+            <div className="h-full rounded-sm bg-cyan-500/60" style={{ width: '40%' }} />
+          </div>
+          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
+            Daily
+          </div>
+        </div>
+
+        {/* Uptime */}
+        <div className="ui-panel p-3 relative overflow-hidden">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Uptime</div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-white font-mono leading-tight">
+              {latestData ? formatUptime(latestData.uptime) : '--'}
+            </span>
+          </div>
+          {/* Status indicator */}
+          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+            <div className="h-full rounded-sm bg-green-500/60" style={{ width: '100%' }} />
+          </div>
+          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
+            Stable
           </div>
         </div>
       </div>
