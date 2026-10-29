@@ -135,96 +135,110 @@ export default function ServerMonitor({ domain, clientName }: ServerMonitorProps
         )}
       </div>
 
-      {/* Metrics Grid — Terminal-Professional */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* CPU Load */}
-        <div className="ui-panel p-3 relative overflow-hidden">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">CPU Load</div>
-          <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold text-white font-mono">{latestData ? latestData.cpu_usage.toFixed(1) : '--'}</span>
-            <span className="text-sm text-gray-500">%</span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
-            <div 
-              className="h-full rounded-sm transition-all duration-500"
-              style={{ 
-                width: latestData ? `${Math.min(latestData.cpu_usage, 100)}%` : '0%',
-                backgroundColor: latestData 
-                  ? latestData.cpu_usage > 80 ? '#ef4444' 
-                  : latestData.cpu_usage > 60 ? '#f59e0b' 
-                  : '#22c55e'
-                  : '#22c55e'
-              }}
-            />
-          </div>
-          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
-            {latestData 
-              ? latestData.cpu_usage > 80 ? 'Critical' 
-              : latestData.cpu_usage > 60 ? 'Warning' 
-              : 'Normal'
-              : '—'}
-          </div>
-        </div>
-
-        {/* Memory */}
-        <div className="ui-panel p-3 relative overflow-hidden">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Memory</div>
-          <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold text-white font-mono">{latestData ? Math.round(latestData.ram_used) : '--'}</span>
-            <span className="text-sm text-gray-500">MB</span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
-            <div 
-              className="h-full rounded-sm transition-all duration-500"
-              style={{ 
-                width: latestData ? `${Math.min(latestData.ram_percentage, 100)}%` : '0%',
-                backgroundColor: latestData 
-                  ? latestData.ram_percentage > 90 ? '#ef4444' 
-                  : latestData.ram_percentage > 75 ? '#f59e0b' 
-                  : '#a855f7'
-                  : '#a855f7'
-              }}
-            />
-          </div>
-          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
-            {latestData 
-              ? `${latestData.ram_percentage.toFixed(0)}% of ${Math.round(latestData.ram_total)} MB`
-              : '—'}
-          </div>
-        </div>
-
-        {/* Bandwidth */}
-        <div className="ui-panel p-3 relative overflow-hidden">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Bandwidth</div>
-          <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold text-white font-mono">{latestData ? latestData.bandwidth_daily_gb : '--'}</span>
-            <span className="text-sm text-gray-500">GB</span>
-          </div>
-          {/* Visual bar placeholder */}
-          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
-            <div className="h-full rounded-sm bg-cyan-500/60" style={{ width: '40%' }} />
-          </div>
-          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
-            Daily
-          </div>
-        </div>
-
-        {/* Uptime */}
-        <div className="ui-panel p-3 relative overflow-hidden">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-medium">Uptime</div>
-          <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold text-white font-mono leading-tight">
-              {latestData ? formatUptime(latestData.uptime) : '--'}
+      {/* Metrics — Single Cohesive Panel (Opsi D) */}
+      <div className="ui-panel p-4 md:p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">System Metrics</h3>
+          <div className="flex items-center gap-2">
+            <div className={`w-1.5 h-1.5 rounded-full ${isConnected && !error ? 'bg-green-400 shadow-[0_0_6px_rgba(34,197,94,0.9)]' : 'bg-gray-600'}`} />
+            <span className={`text-[10px] uppercase tracking-[0.2em] ${isConnected && !error ? 'text-green-400' : 'text-gray-500'}`}>
+              {isConnected && !error ? 'Live' : 'Offline'}
             </span>
           </div>
-          {/* Status indicator */}
-          <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
-            <div className="h-full rounded-sm bg-green-500/60" style={{ width: '100%' }} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+          {/* CPU Load */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">CPU Load</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{
+                color: !latestData ? '#6b7280'
+                  : latestData.cpu_usage > 80 ? '#ef4444'
+                  : latestData.cpu_usage > 60 ? '#f59e0b'
+                  : '#22c55e'
+              }}>
+                {latestData
+                  ? latestData.cpu_usage > 80 ? 'Critical'
+                  : latestData.cpu_usage > 60 ? 'Warning'
+                  : 'Normal'
+                  : '—'}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-2xl md:text-3xl font-bold text-white font-mono">{latestData ? latestData.cpu_usage.toFixed(1) : '--'}</span>
+              <span className="text-sm text-gray-500">%</span>
+            </div>
+            <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+              <div
+                className="h-full rounded-sm transition-all duration-500"
+                style={{
+                  width: latestData ? `${Math.min(latestData.cpu_usage, 100)}%` : '0%',
+                  backgroundColor: !latestData ? '#374151'
+                    : latestData.cpu_usage > 80 ? '#ef4444'
+                    : latestData.cpu_usage > 60 ? '#f59e0b'
+                    : '#22c55e'
+                }}
+              />
+            </div>
           </div>
-          <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wider">
-            Stable
+
+          {/* Memory */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">Memory</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-purple-400">
+                {latestData ? `${latestData.ram_percentage.toFixed(0)}%` : '—'}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-2xl md:text-3xl font-bold text-white font-mono">{latestData ? Math.round(latestData.ram_used) : '--'}</span>
+              <span className="text-sm text-gray-500">MB</span>
+              <span className="text-xs text-gray-600">/ {latestData ? Math.round(latestData.ram_total) : '--'} MB</span>
+            </div>
+            <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+              <div
+                className="h-full rounded-sm transition-all duration-500"
+                style={{
+                  width: latestData ? `${Math.min(latestData.ram_percentage, 100)}%` : '0%',
+                  backgroundColor: !latestData ? '#374151'
+                    : latestData.ram_percentage > 90 ? '#ef4444'
+                    : latestData.ram_percentage > 75 ? '#f59e0b'
+                    : '#a855f7'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Bandwidth */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">Bandwidth</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-cyan-400">Daily</span>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-2xl md:text-3xl font-bold text-white font-mono">{latestData ? latestData.bandwidth_daily_gb : '--'}</span>
+              <span className="text-sm text-gray-500">GB</span>
+            </div>
+            <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+              <div className="h-full rounded-sm bg-cyan-500/60" style={{ width: '40%' }} />
+            </div>
+          </div>
+
+          {/* Uptime */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">Uptime</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-green-400">Stable</span>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-3">
+              <span className="text-2xl md:text-3xl font-bold text-white font-mono leading-tight">
+                {latestData ? formatUptime(latestData.uptime) : '--'}
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-800 rounded-sm overflow-hidden">
+              <div className="h-full rounded-sm bg-green-500/60" style={{ width: '100%' }} />
+            </div>
           </div>
         </div>
       </div>
