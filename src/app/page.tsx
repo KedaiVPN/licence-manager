@@ -1,6 +1,4 @@
 import { db, initDb } from "@/lib/db";
-import { Server, Activity, Users } from "lucide-react";
-import Link from "next/link";
 import NodeCardLink from "./NodeCardLink";
 export const revalidate = 60;
 
@@ -56,41 +54,62 @@ export default async function Home() {
             <h2 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white">
               System <span className="text-cyan-400">Status</span>
             </h2>
-            <p className="text-cyan-600 max-w-2xl text-sm md:text-base">
-              Monitoring global node distribution and active license metrics across the secure network.
-            </p>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="ui-panel p-6 relative overflow-hidden">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="p-3 bg-cyan-950/40 border border-cyan-900 text-cyan-400">
-                  <Server className="w-5 h-5" />
+          {/* Apple Weather Style Single Card Metrics */}
+          <div className="ui-panel p-5 md:p-6 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-400 font-bold mb-1">Network Overview</div>
+                <div className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                  {totalVPS} <span className="text-sm font-normal text-gray-400">Total Nodes</span>
                 </div>
-                <h3 className="ui-label">Total Nodes</h3>
               </div>
-              <div className="text-4xl font-bold text-white">{totalVPS}</div>
+              <div className="flex items-center gap-2 px-3 py-1 bg-cyan-950/40 border border-cyan-900 rounded-sm">
+                <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.9)] animate-pulse" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-green-400 font-bold">Secure Network</span>
+              </div>
             </div>
 
-            <div className="ui-panel p-6 relative overflow-hidden">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="p-3 bg-cyan-950/40 border border-cyan-900 text-cyan-400">
-                  <Activity className="w-5 h-5" />
-                </div>
-                <h3 className="ui-label">Active Nodes</h3>
+            {/* Horizontal progress ratio (Active vs Total) */}
+            <div className="mb-6 space-y-2">
+              <div className="flex justify-between text-xs tracking-wider">
+                <span className="text-gray-400 uppercase">Active Ratio</span>
+                <span className="text-cyan-400 font-bold font-mono">
+                  {totalVPS > 0 ? Math.round((activeVPS / totalVPS) * 100) : 0}% Active
+                </span>
               </div>
-              <div className="text-4xl font-bold text-cyan-300">{activeVPS}</div>
+              <div className="h-2 bg-gray-900 rounded-sm overflow-hidden p-0.5 border border-cyan-950">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-500 to-green-400 rounded-sm transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"
+                  style={{ width: `${totalVPS > 0 ? (activeVPS / totalVPS) * 100 : 0}%` }}
+                />
+              </div>
             </div>
 
-            <div className="ui-panel p-6 relative overflow-hidden">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="p-3 bg-pink-950/30 border border-pink-900 text-pink-400">
-                  <Users className="w-5 h-5" />
+            {/* Sub-tiles grid (Weather app style) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-cyan-950/60">
+              {/* Active Nodes Tile */}
+              <div className="ui-panel-inset p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-1">Active Nodes</div>
+                  <div className="text-2xl md:text-3xl font-bold text-cyan-300 font-mono">{activeVPS}</div>
                 </div>
-                <h3 className="ui-label">Registered Clients</h3>
+                <div className="w-10 h-10 rounded-sm bg-cyan-950/50 border border-cyan-900 flex items-center justify-center text-cyan-400 font-bold text-xs tracking-widest">
+                  ACT
+                </div>
               </div>
-              <div className="text-4xl font-bold text-pink-400">{totalClients}</div>
+
+              {/* Registered Clients Tile */}
+              <div className="ui-panel-inset p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-1">Registered Clients</div>
+                  <div className="text-2xl md:text-3xl font-bold text-pink-400 font-mono">{totalClients}</div>
+                </div>
+                <div className="w-10 h-10 rounded-sm bg-pink-950/30 border border-pink-900 flex items-center justify-center text-pink-400 font-bold text-xs tracking-widest">
+                  CLI
+                </div>
+              </div>
             </div>
           </div>
 
