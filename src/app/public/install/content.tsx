@@ -46,20 +46,26 @@ export default function PublicInstallContent() {
     setLoadingLicense(true);
     (async () => {
       try {
-        const res = await fetch(`/api/client/install/license?ip=${encodeURIComponent(ipParam)}`);
-        if (res.status === 401) {
+        const licRes = await fetch(`/api/client/install/license?ip=${encodeURIComponent(ipParam)}`);
+        if (licRes.status === 401) {
           router.push("/login");
           return;
         }
-        const data = await res.json();
-        if (data.license) {
-          setLicense(data.license);
-          setFormData((current) => ({ ...current, domain: current.domain || data.license.domain || "" }));
+        const licData = await licRes.json();
+        const lic = licData.license;
+        setLicense(lic);
+        if (lic) {
+          setFormData((current) => ({ ...current, domain: current.domain || lic.domain || "" }));
         }
-        if (data.job && data.job.status !== "cancelled") {
-          setJob(data.job);
-          setJobLog("");
-          setJobStatus(data.job.status);
+
+        const jobRes = await fetch(`/api/client/install?ip=${encodeURIComponent(ipParam)}`);
+        if (jobRes.ok) {
+          const { job: latest } = await jobRes.json();
+          if (latest && latest.status !== "cancelled") {
+            setJob(latest);
+            setJobLog("");
+            setJobStatus(latest.status);
+          }
         }
       } finally {
         setLoadingLicense(false);
@@ -102,6 +108,7 @@ export default function PublicInstallContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ip_address: license.ip_address,
+          client_name: license.client_name,
           domain: formData.domain,
           ssh_port: Number(formData.ssh_port) || 22,
           password: formData.password,

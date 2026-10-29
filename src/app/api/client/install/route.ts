@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyUserToken } from "@/lib/auth";
-import { encryptSecret } from "@/lib/install-crypto";
 
-// Helper to get authenticated user from session cookie
 async function getAuthUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get("user_session")?.value;
@@ -12,8 +10,33 @@ async function getAuthUser() {
   return await verifyUserToken(token);
 }
 
+// GET /api/client/install?ip=... — Get latest install job for this user's license
+export async function GET(request: Request) {
+  try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const ip = searchParams.get("ip");
+    if (!ip) {
+      return NextResponse.json({ error: "ip is required" }, { status: 400 });
+    }
+
+    // Get latest job for this IP belonging to this user
+    const res = await db.execute({
+      sql: "SELECT id, ip_address, client_name, domain, status, log, created_at, started_at, finished_at FROM install_jobs WHERE ip_address = ? AND owner_tele_id = ? ORDER BY id DESC LIMIT 1",
+      args: [ip, user.tele_id],
+    });
+
+    return NextResponse.json({ job: res.rows[0] || null });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch job" }, { status: 500 });
+  }
+}
+
 // POST /api/client/install — Trigger installation for user's own license
-// Body: { ip_address, ssh_port?, password }
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
@@ -21,7 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { ip_address, ssh_port, password } = await request.json();
+    const { ip_address, ssh_port, password, domain, client_name } = await request.json();
 
     if (!ip_address || !password) {
       return NextResponse.json({ error: "ip_address and password are required" }, { status: 400 });
@@ -53,6 +76,7 @@ export async function POST(request: Request) {
     }
 
     // Encrypt password
+    const { encryptSecret } = await import("@/lib/install-crypto");
     const encKey = process.env.INSTALL_ENC_KEY || "";
     if (encKey.length !== 32) {
       return NextResponse.json({ error: "INSTALL_ENC_KEY is not configured (must be 32 chars)" }, { status: 500 });
@@ -65,8 +89,8 @@ export async function POST(request: Request) {
             VALUES (?, ?, ?, ?, ?, 'pending', '', ?)`,
       args: [
         ip_address,
-        license.client_name,
-        license.domain || "-",
+        client_name || license.client_name,
+        domain || license.domain || "-",
         ssh_port || 22,
         passwordEnc,
         user.tele_id,

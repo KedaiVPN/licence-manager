@@ -79,9 +79,20 @@ if (!columns.includes('notif_state')) {
         log TEXT DEFAULT '',
         started_at DATETIME,
         finished_at DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        owner_tele_id TEXT
       )
     `);
+
+    // Migrate install_jobs table: add owner_tele_id if missing
+    try {
+      const ijColumns = (await db.execute("PRAGMA table_info(install_jobs)")).rows.map((r: any) => r.name);
+      if (!ijColumns.includes('owner_tele_id')) {
+        await db.execute("ALTER TABLE install_jobs ADD COLUMN owner_tele_id TEXT");
+      }
+    } catch (e) {
+      console.error("Failed to migrate install_jobs table:", e);
+    }
 
     console.log("Database initialized and tables verified.");
   } catch (error) {

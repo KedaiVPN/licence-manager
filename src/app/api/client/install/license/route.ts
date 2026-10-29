@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "ip is required" }, { status: 400 });
     }
 
-    // Pastikan lisensi ini milik user tersebut
+    // Get license milik user ini berdasarkan IP
     const res = await db.execute({
       sql: "SELECT ip_address, client_name, status, domain FROM licenses WHERE ip_address = ? AND tele_id = ?",
       args: [ip, user.tele_id],
@@ -34,16 +34,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ license: null });
     }
 
-    // Cek juga apakah ada job aktif untuk IP ini
-    const jobRes = await db.execute({
-      sql: "SELECT id, ip_address, client_name, domain, status, log, created_at, started_at, finished_at FROM install_jobs WHERE ip_address = ? AND owner_tele_id = ? ORDER BY id DESC LIMIT 1",
-      args: [ip, user.tele_id],
-    });
-
-    return NextResponse.json({
-      license: res.rows[0],
-      job: jobRes.rows[0] || null,
-    });
+    return NextResponse.json({ license: res.rows[0] });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch license" }, { status: 500 });
   }
