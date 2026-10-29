@@ -1,43 +1,60 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth';
+import { verifyToken, verifyUserToken } from './lib/auth';
 
-// Paths that require authentication
-const protectedPaths = ['/admin-dynamic', '/api/admin'];
+// Paths that require admin authentication
+const adminProtectedPaths = ['/admin-dynamic', '/api/admin'];
+// Paths that require user authentication
+const userProtectedPaths = ['/dashboard', '/api/client'];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Check if the path is protected
-  const isProtectedPath = protectedPaths.some((p) => path.startsWith(p));
-
-  if (isProtectedPath) {
+  // Check admin protected paths
+  const isAdminProtected = adminProtectedPaths.some((p) => path.startsWith(p));
+  if (isAdminProtected) {
     const token = request.cookies.get('admin_token')?.value;
-
     if (!token) {
-      // If it's an API route, return 401
       if (path.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      // Otherwise, redirect to login
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const payload = await verifyToken(token);
-
     if (!payload) {
-      // Invalid token
       if (path.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      // Clear cookie and redirect to login
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('admin_token');
       return response;
     }
   }
 
-  // Redirect authenticated users away from login page
+  // Check user protected paths
+  const isUserProtected = userProtectedPaths.some((p) => path.startsWith(p));
+  if (isUserProtected) {
+    const token = request.cookies.get('user_session')?.value;
+    if (!token) {
+      if (path.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL('/auth/telegram', request.url));
+    }
+
+    const payload = await verifyUserToken(token);
+    if (!payload) {
+      if (path.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const response = NextResponse.redirect(new URL('/auth/telegram', request.url));
+      response.cookies.delete('user_session');
+      return response;
+    }
+  }
+
+  // Redirect authenticated admins away from login page
   if (path === '/login') {
     const token = request.cookies.get('admin_token')?.value;
     if (token) {
