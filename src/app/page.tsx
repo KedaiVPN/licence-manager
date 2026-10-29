@@ -50,12 +50,6 @@ export default async function Home() {
 
         {/* Main Content */}
         <main className="flex-grow max-w-6xl mx-auto px-6 mt-12 w-full space-y-12">
-          <div className="space-y-3">
-            <h2 className="text-3xl md:text-5xl font-bold uppercase tracking-tight text-white">
-              System <span className="text-cyan-400">Status</span>
-            </h2>
-          </div>
-
           {/* Apple Weather Style Single Card Metrics */}
           <div className="ui-panel p-5 md:p-6 relative overflow-hidden">
             <div className="flex items-center justify-between mb-6">
