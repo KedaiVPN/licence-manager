@@ -20,7 +20,7 @@ export default async function Home() {
     totalClients = uniqueClients.size;
 
     nodes = result.rows
-      .filter(row => row.is_monitoring_enabled === 1 && (row.tele_id === null || row.tele_id === ""))
+      .filter(row => row.is_monitoring_enabled === 1 && row.tele_id === null)
       .sort((a, b) => (a.client_name as string).localeCompare(b.client_name as string));
   } catch (error) {
     console.error("Failed to fetch public stats:", error);

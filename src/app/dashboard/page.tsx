@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import InstallButton from "./InstallButton";
 import MonitorButton from "./MonitorButton";
 import {
