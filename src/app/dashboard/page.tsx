@@ -168,24 +168,14 @@ export default function DashboardPage() {
     ? licenses.find((license) => license.ip_address === showInstallModal)
     : null; 
 
-  const activeLicenses = licenses.filter((license) => license.status === "active").length; 
-
-  const bannedLicenses = licenses.length - activeLicenses; 
-
-  const expirySoon = licenses.filter((license) => {
-    const expiry = new Date(`${license.expired_date}T23:59:59`);
-    const now = new Date();
-    const inThirtyDays = new Date(now);
-    inThirtyDays.setDate(now.getDate() + 30);
-    return expiry >= now && expiry <= inThirtyDays;
-  }).length; 
+  const activeLicenses = licenses.filter((license) => license.status === "active").length;
+  const bannedLicenses = licenses.length - activeLicenses;
 
   const summaryItems = [
     { label: "Total", value: licenses.length, color: "text-white" },
     { label: "Active", value: activeLicenses, color: "text-cyan-400" },
     { label: "Banned", value: bannedLicenses, color: "text-pink-400" },
-    { label: "Expiring", value: expirySoon, color: "text-yellow-400" },
-  ]; 
+  ];
 
   const installModal = selectedLicense && (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -250,11 +240,11 @@ export default function DashboardPage() {
   );
 
   const summaryGrid = (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="border border-cyan-950 bg-black/30 p-6 flex items-center justify-between gap-8">
       {summaryItems.map((item) => (
-        <div key={item.label} className="border border-cyan-950 p-3 bg-black/30">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-700 mb-1">{item.label}</div>
-          <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
+        <div key={item.label} className="flex-1 text-center">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-700 mb-2">{item.label}</div>
+          <div className={`text-3xl font-bold ${item.color}`}>{item.value}</div>
         </div>
       ))}
     </div>
