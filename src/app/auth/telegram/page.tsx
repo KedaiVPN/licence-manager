@@ -5,34 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader } from "lucide-react";
 
-// Telegram OAuth OIDC Flow constants
-const CLIENT_ID = "7572532126";
-
-function generateRandomString(length: number): string {
-  const array = new Uint8Array(length);
-  window.crypto.getRandomValues(array);
-  return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join('');
-}
-
-async function sha256(plain: string): Promise<ArrayBuffer> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return window.crypto.subtle.digest('SHA-256', data);
-}
-
-function base64UrlEncode(buffer: ArrayBuffer): string {
-  let str = '';
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    str += String.fromCharCode(bytes[i]);
-  }
-  return btoa(str)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-
 export default function TelegramAuthPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -83,30 +55,17 @@ export default function TelegramAuthPage() {
     setError("");
 
     try {
-      const redirectUri = `${window.location.origin}/api/auth/telegram/callback`;
-      const state = generateRandomString(32);
-      const codeVerifier = generateRandomString(64);
-      const hashed = await sha256(codeVerifier);
-      const codeChallenge = base64UrlEncode(hashed);
+      // Call backend start endpoint to securely generate PKCE and cookies
+      const res = await fetch("/api/auth/telegram/start");
+      if (!res.ok) {
+        throw new Error("Failed to initialize Telegram OAuth session");
+      }
+      const data = await res.json();
+      if (!data.redirectUrl) {
+        throw new Error("Invalid response from auth initialization");
+      }
 
-      // Save verifier and state in session storage for callback validation
-      sessionStorage.setItem("tg_code_verifier", codeVerifier);
-      sessionStorage.setItem("tg_auth_state", state);
-
-      const params = new URLSearchParams({
-        client_id: CLIENT_ID,
-        origin: window.location.origin,
-        redirect_uri: redirectUri,
-        response_type: "code",
-        scope: "openid profile",
-        state: state,
-        code_challenge: codeChallenge,
-        code_challenge_method: "S256",
-        quick_auth: "new",
-      });
-
-      // Redirect to official Telegram OAuth / OIDC authorization URL
-      window.location.href = `https://oauth.telegram.org/auth?${params.toString()}`;
+      window.location.href = data.redirectUrl;
     } catch (err: any) {
       setError(err.message || "Failed to initiate Telegram login");
       setIsLoading(false);
