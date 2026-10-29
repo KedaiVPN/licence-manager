@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     const { ip_address, client_name, expired_date, label, domain } = await request.json();
 
-    if (!ip_address || !client_name || !expired_date || !label) {
+    if (!ip_address || !client_name || !expired_date || !label || !domain) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 

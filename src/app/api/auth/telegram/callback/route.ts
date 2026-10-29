@@ -84,16 +84,37 @@ export async function GET(request: NextRequest) {
       audience: clientId,
     });
 
-    const telegramId = String(payload.sub);
+    // Use 'id' claim for actual Telegram user ID (not 'sub' which is OIDC identifier)
+    const telegramId = String(payload.id || payload.sub);
+    const oidcSub = String(payload.sub); // OIDC subject — used to find migrated licenses
     const username = (payload.preferred_username as string) || (payload.username as string) || undefined;
     const firstName = (payload.name as string) || (payload.given_name as string) || undefined;
 
     if (!telegramId) {
-      console.error("[TELEGRAM OAUTH] Payload missing sub (telegram id)", payload);
+      console.error("[TELEGRAM OAUTH] Payload missing id (telegram id)", payload);
       return NextResponse.redirect(`${baseUrl}/auth/telegram?error=invalid_user_payload`);
     }
 
-    // 3. Create app user session
+    // 3. Migrate licenses from OIDC sub to real Telegram id if needed
+    try {
+      const { db } = await import("@/lib/db");
+      // Licenses stored under OIDC sub (wrong ID) — migrate to correct Telegram id
+      await db.execute({
+        sql: `UPDATE install_jobs SET owner_tele_id = ? WHERE owner_tele_id = ?`,
+        args: [telegramId, oidcSub],
+      });
+      const migrated = await db.execute({
+        sql: `UPDATE licenses SET tele_id = ? WHERE tele_id = ?`,
+        args: [telegramId, oidcSub],
+      });
+      if (migrated.rowsAffected > 0) {
+        console.log(`[TELEGRAM OAUTH] Migrated ${migrated.rowsAffected} license(s) from sub=${oidcSub} to id=${telegramId}`);
+      }
+    } catch (migrateErr) {
+      console.error("[TELEGRAM OAUTH] Migration error (non-fatal):", migrateErr);
+    }
+
+    // 4. Create app user session
     const sessionToken = await signUserToken({
       tele_id: telegramId,
       username,

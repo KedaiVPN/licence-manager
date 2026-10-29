@@ -375,7 +375,7 @@ export default function DashboardPage() {
 
                     <div>
                       <label className="ui-label block mb-2">
-                        Domain (optional)
+                        Domain *
                       </label>
                       <input
                         type="text"
@@ -385,6 +385,7 @@ export default function DashboardPage() {
                         }
                         className="ui-input p-2 font-mono text-sm"
                         placeholder="node1.example.com"
+                        required
                       />
                     </div>
 
@@ -488,14 +489,14 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openInstallModal(license.ip_address)}
-                        disabled={license.status !== "active"}
-                        className="flex-1 py-2 bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      <Link
+                        href={`/public/install?ip=${encodeURIComponent(license.ip_address)}`}
+                        className={`flex-1 py-2 text-center bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950 transition-colors ${
+                          license.status !== "active" ? "opacity-40 pointer-events-none" : ""
+                        }`}
                       >
                         Install
-                      </button>
+                      </Link>
                       <button className="flex-1 py-2 border border-cyan-900 text-cyan-400 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950/20 transition-colors">
                         Monitor
                       </button>
