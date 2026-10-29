@@ -19,6 +19,7 @@ type License = {
   status: "active" | "banned";
   label?: string;
   domain?: string;
+  is_monitoring_enabled?: number;
 };
 
 type FormData = {
@@ -497,7 +498,16 @@ export default function DashboardPage() {
                       >
                         Install
                       </Link>
-                      <button className="flex-1 py-2 border border-cyan-900 text-cyan-400 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950/20 transition-colors">
+                      <button
+                        onClick={() => router.push(`/${license.client_name}/monitoring`)}
+                        className={`flex-1 py-2 border text-xs uppercase tracking-wider font-bold transition-colors ${
+                          license.is_monitoring_enabled
+                            ? "border-cyan-500/50 text-cyan-300 hover:bg-cyan-950/20"
+                            : "border-cyan-900 text-cyan-800 cursor-not-allowed opacity-50"
+                        }`}
+                        disabled={!license.is_monitoring_enabled}
+                        title={license.is_monitoring_enabled ? "Buka halaman monitoring" : "Monitoring aktif setelah instalasi berhasil"}
+                      >
                         Monitor
                       </button>
                     </div>

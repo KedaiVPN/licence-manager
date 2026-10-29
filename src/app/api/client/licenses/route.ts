@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     const result = await db.execute({
-      sql: "SELECT * FROM licenses WHERE tele_id = ? ORDER BY client_name ASC",
+      sql: "SELECT ip_address, client_name, expired_date, status, label, domain, is_monitoring_enabled FROM licenses WHERE tele_id = ? ORDER BY client_name ASC",
       args: [user.tele_id],
     });
 
