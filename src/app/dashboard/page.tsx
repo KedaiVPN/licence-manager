@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import InstallButton from "./InstallButton";
+import MonitorButton from "./MonitorButton";
 import {
   LogOut,
   Plus,
@@ -490,26 +492,14 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Link
-                        href={`/public/install?ip=${encodeURIComponent(license.ip_address)}`}
-                        className={`flex-1 py-2 text-center bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950 transition-colors ${
-                          license.status !== "active" ? "opacity-40 pointer-events-none" : ""
-                        }`}
-                      >
-                        Install
-                      </Link>
-                      <button
-                        onClick={() => router.push(`/${license.client_name}/monitoring`)}
-                        className={`flex-1 py-2 border text-xs uppercase tracking-wider font-bold transition-colors ${
-                          license.is_monitoring_enabled
-                            ? "border-cyan-500/50 text-cyan-300 hover:bg-cyan-950/20"
-                            : "border-cyan-900 text-cyan-800 cursor-not-allowed opacity-50"
-                        }`}
-                        disabled={!license.is_monitoring_enabled}
-                        title={license.is_monitoring_enabled ? "Buka halaman monitoring" : "Monitoring aktif setelah instalasi berhasil"}
-                      >
-                        Monitor
-                      </button>
+                      <InstallButton
+                        ipAddress={license.ip_address}
+                        disabled={license.status !== "active"}
+                      />
+                      <MonitorButton
+                        clientName={license.client_name}
+                        isEnabled={Boolean(license.is_monitoring_enabled)}
+                      />
                     </div>
                   </div>
                 ))}

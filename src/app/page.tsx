@@ -11,7 +11,7 @@ export default async function Home() {
   let nodes: Record<string, unknown>[] = [];
 
   try {
-    const result = await db.execute("SELECT client_name, status, is_monitoring_enabled, domain FROM licenses");
+    const result = await db.execute("SELECT client_name, status, is_monitoring_enabled, domain, tele_id FROM licenses");
 
     totalVPS = result.rows.length;
     activeVPS = result.rows.filter(row => row.status === 'active').length;
@@ -20,7 +20,7 @@ export default async function Home() {
     totalClients = uniqueClients.size;
 
     nodes = result.rows
-      .filter(row => row.is_monitoring_enabled === 1)
+      .filter(row => row.is_monitoring_enabled === 1 && (row.tele_id === null || row.tele_id === ""))
       .sort((a, b) => (a.client_name as string).localeCompare(b.client_name as string));
   } catch (error) {
     console.error("Failed to fetch public stats:", error);
