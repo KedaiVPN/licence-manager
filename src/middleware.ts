@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
       if (path.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      return NextResponse.redirect(new URL('/auth/telegram', request.url));
+      return NextResponse.redirect(new URL('/publik/login', request.url));
     }
 
     const payload = await verifyUserToken(token);
@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
       if (path.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      const response = NextResponse.redirect(new URL('/auth/telegram', request.url));
+      const response = NextResponse.redirect(new URL('/publik/login', request.url));
       response.cookies.delete('user_session');
       return response;
     }

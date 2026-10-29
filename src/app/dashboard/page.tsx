@@ -62,7 +62,7 @@ export default function DashboardPage() {
         const data = await res.json();
         setLicenses(data.licenses || []);
       } else if (res.status === 401) {
-        router.push("/auth/telegram");
+        router.push("/publik/login");
       }
     } catch (error) {
       console.error("Failed to fetch licenses:", error);
@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/auth/telegram");
+    router.push("/publik/login");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
