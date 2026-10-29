@@ -34,6 +34,11 @@ export default function DashboardPage() {
   const [licenses, setLicenses] = useState<License[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState<string | null>(null); // ip_address or null
+  const [installPassword, setInstallPassword] = useState("");
+  const [installPort, setInstallPort] = useState("22");
+  const [installError, setInstallError] = useState("");
+  const [installLoading, setInstallLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -103,6 +108,156 @@ export default function DashboardPage() {
     }
   };
 
+  const handleInstall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!showInstallModal) return;
+    setInstallLoading(true);
+    setInstallError("");
+
+    try {
+      const res = await fetch("/api/client/install", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ip_address: showInstallModal,
+          ssh_port: Number(installPort),
+          password: installPassword,
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowInstallModal(null);
+        setInstallPassword("");
+        setInstallPort("22");
+      } else {
+        setInstallError(data.error || "Failed to start installation");
+      }
+    } catch {
+      setInstallError("Network error occurred");
+    } finally {
+      setInstallLoading(false);
+    }
+  }; 
+
+  const openInstallModal = (ipAddress: string) => {
+    setShowInstallModal(ipAddress);
+    setInstallPassword("");
+    setInstallPort("22");
+    setInstallError("");
+  }; 
+
+  const closeInstallModal = () => {
+    if (!installLoading) {
+      setShowInstallModal(null);
+      setInstallPassword("");
+      setInstallError("");
+    }
+  };
+
+  const closeForm = () => {
+    if (!formLoading) {
+      setShowForm(false);
+      setFormError("");
+    }
+  }; 
+
+  const selectedLicense = showInstallModal
+    ? licenses.find((license) => license.ip_address === showInstallModal)
+    : null; 
+
+  const activeLicenses = licenses.filter((license) => license.status === "active").length; 
+
+  const bannedLicenses = licenses.length - activeLicenses; 
+
+  const expirySoon = licenses.filter((license) => {
+    const expiry = new Date(`${license.expired_date}T23:59:59`);
+    const now = new Date();
+    const inThirtyDays = new Date(now);
+    inThirtyDays.setDate(now.getDate() + 30);
+    return expiry >= now && expiry <= inThirtyDays;
+  }).length; 
+
+  const summaryItems = [
+    { label: "Total", value: licenses.length, color: "text-white" },
+    { label: "Active", value: activeLicenses, color: "text-cyan-400" },
+    { label: "Banned", value: bannedLicenses, color: "text-pink-400" },
+    { label: "Expiring", value: expirySoon, color: "text-yellow-400" },
+  ]; 
+
+  const installModal = selectedLicense && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="ui-panel p-6 shadow-2xl w-full max-w-lg bg-[#0a0a0c] relative">
+        <button
+          type="button"
+          onClick={closeInstallModal}
+          disabled={installLoading}
+          className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500 disabled:opacity-50"
+          aria-label="Close install dialog"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <h3 className="text-lg font-bold text-cyan-400 mb-1 uppercase tracking-widest">
+          Install Server
+        </h3>
+        <p className="text-sm text-gray-400 mb-5 pb-4 border-b border-cyan-950">
+          <span className="text-white">{selectedLicense.client_name}</span> · {selectedLicense.ip_address}
+        </p>
+        {installError && (
+          <div className="mb-4 p-3 bg-pink-950/30 border border-pink-500/50 text-pink-400 text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" /> {installError}
+          </div>
+        )}
+        <form onSubmit={handleInstall} className="space-y-4">
+          <div>
+            <label className="ui-label block mb-2">SSH Password *</label>
+            <input
+              type="password"
+              autoComplete="new-password"
+              value={installPassword}
+              onChange={(event) => setInstallPassword(event.target.value)}
+              className="ui-input p-2 font-mono text-sm"
+              required
+            />
+          </div>
+          <div>
+            <label className="ui-label block mb-2">SSH Port</label>
+            <input
+              type="number"
+              min="1"
+              max="65535"
+              value={installPort}
+              onChange={(event) => setInstallPort(event.target.value)}
+              className="ui-input p-2 font-mono text-sm"
+              required
+            />
+          </div>
+          <p className="text-[11px] leading-relaxed text-cyan-800">
+            Password dienkripsi sebelum disimpan dan hanya digunakan daemon instalasi.
+          </p>
+          <button
+            type="submit"
+            disabled={installLoading}
+            className="w-full bg-cyan-950/60 border border-cyan-500 text-cyan-400 py-3 uppercase tracking-widest font-bold hover:bg-cyan-400 hover:text-black transition-colors disabled:opacity-50"
+          >
+            {installLoading ? "STARTING..." : "START INSTALLATION"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
+  const summaryGrid = (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {summaryItems.map((item) => (
+        <div key={item.label} className="border border-cyan-950 p-3 bg-black/30">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-700 mb-1">{item.label}</div>
+          <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
+        </div>
+      ))}
+    </div>
+  ); 
+
   return (
     <div className="min-h-screen bg-black text-cyan-400 font-mono selection:bg-pink-500 selection:text-white pb-12">
       {/* Background grid */}
@@ -144,11 +299,8 @@ export default function DashboardPage() {
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-400 font-bold mb-1">
-                    Your Nodes
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                    {licenses.length}
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-400 font-bold mb-2">
+                    Overview
                   </div>
                 </div>
                 <button
@@ -158,15 +310,18 @@ export default function DashboardPage() {
                   <Plus className="w-4 h-4" /> Register License
                 </button>
               </div>
+              {summaryGrid}
             </div>
 
             {/* Form Modal */}
             {showForm && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                <div className="ui-panel p-6 shadow-2xl w-full max-w-2xl bg-[#0a0a0c]">
+                <div className="ui-panel p-6 shadow-2xl w-full max-w-2xl bg-[#0a0a0c] relative">
                   <button
-                    onClick={() => setShowForm(false)}
-                    className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500"
+                    type="button"
+                    onClick={closeForm}
+                    disabled={formLoading}
+                    className="absolute top-4 right-4 text-cyan-500 hover:text-pink-500 disabled:opacity-50"
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -333,7 +488,12 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <button className="flex-1 py-2 bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => openInstallModal(license.ip_address)}
+                        disabled={license.status !== "active"}
+                        className="flex-1 py-2 bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
                         Install
                       </button>
                       <button className="flex-1 py-2 border border-cyan-900 text-cyan-400 text-xs uppercase tracking-wider font-bold hover:bg-cyan-950/20 transition-colors">
@@ -346,6 +506,7 @@ export default function DashboardPage() {
             )}
           </div>
         </main>
+        {installModal}
       </div>
     </div>
   );
