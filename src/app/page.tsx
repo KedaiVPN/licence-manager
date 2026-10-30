@@ -1,5 +1,6 @@
 import { db, initDb } from "@/lib/db";
 import NodeCardLink from "./NodeCardLink";
+import DynamicLicenseHeader from "@/components/DynamicLicenseHeader";
 export const revalidate = 60;
 
 export default async function Home() {
@@ -38,15 +39,7 @@ export default async function Home() {
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <h1 className="text-2xl font-bold tracking-widest uppercase">
-              <span className="text-cyan-400">DYNAMIC</span>
-              <span className="text-pink-500">LICENCE</span>
-            </h1>
-          </div>
-        </header>
+        <DynamicLicenseHeader showLogout={false} />
 
         {/* Main Content */}
         <main className="flex-grow max-w-6xl mx-auto px-6 mt-12 w-full space-y-12">

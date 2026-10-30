@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import DynamicLicenseHeader from "@/components/DynamicLicenseHeader";
 import InstallButton from "./InstallButton";
 import MonitorButton from "./MonitorButton";
 import {
-  LogOut,
   Plus,
   Server,
   Activity,
@@ -69,11 +69,6 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -263,26 +258,7 @@ export default function DashboardPage() {
       ></div>
 
       <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-bold tracking-widest uppercase text-white">
-                <span className="text-cyan-400">CLIENT</span>
-                <span className="text-pink-500">PORTAL</span>
-              </h1>
-              <p className="text-[10px] text-cyan-600 tracking-[0.2em] uppercase">
-                License Management
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-xs text-pink-400 border border-pink-900 px-3 py-2 hover:bg-pink-950/40 transition-colors uppercase tracking-widest flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" /> Logout
-            </button>
-          </div>
-        </header>
+        <DynamicLicenseHeader />
 
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-6 mt-8">

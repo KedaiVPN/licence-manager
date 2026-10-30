@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Loader } from "lucide-react";
+import DynamicLicenseHeader from "@/components/DynamicLicenseHeader";
 
 interface FormData {
   ip_address: string;
@@ -52,7 +53,10 @@ export default function RegisterLicensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-cyan-400 font-mono flex items-center justify-center p-6">
+    <div className="min-h-screen bg-black text-cyan-400 font-mono flex flex-col">
+      <DynamicLicenseHeader showLogout={false} />
+      
+      <div className="flex-grow flex items-center justify-center p-6">
       <div className="w-full max-w-2xl">
         <div className="ui-panel p-8 shadow-2xl">
           <h2 className="text-2xl font-bold text-white mb-6 uppercase tracking-widest">
@@ -155,6 +159,7 @@ export default function RegisterLicensePage() {
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 }

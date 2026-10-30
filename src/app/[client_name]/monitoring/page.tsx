@@ -1,6 +1,7 @@
 import { db, initDb } from "@/lib/db";
 import { notFound } from "next/navigation";
 import ServerMonitor from "./ServerMonitor";
+import DynamicLicenseHeader from "@/components/DynamicLicenseHeader";
 
 interface PageProps {
   params: Promise<{
@@ -70,14 +71,7 @@ export default async function MonitoringPage({ params }: PageProps) {
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <header className="border-b border-cyan-950 bg-black/90 backdrop-blur-md sticky top-0 z-20">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <h1 className="text-xl md:text-2xl font-bold tracking-wider uppercase">
-              <span className="text-gray-600">NODE/</span>
-              <span className="text-cyan-400">{client_name}</span>
-            </h1>
-          </div>
-        </header>
+        <DynamicLicenseHeader showLogout={false} />
 
         <main className="flex-grow w-full max-w-6xl mx-auto px-6 mt-8">
           <div className="mb-6 border-b border-cyan-950 pb-3 flex justify-between items-end gap-4">
