@@ -114,6 +114,22 @@ async function pingCron() {
 }
 
 // ============================================================
+// ROLE 3: Cron cleanup install logs (setiap hari)
+// ============================================================
+async function cleanupInstallLogsCron() {
+  const t = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
+  try {
+    const data = await httpGet("/api/cron/cleanup-install-logs", config.CRON_SECRET);
+    console.log(`[${t}] [CLEANUP] OK — ${JSON.stringify(data).slice(0, 80)}`);
+  } catch (e) {
+    console.error(`[${t}] [CLEANUP] FAIL — ${e.message}`);
+  }
+}
+
+// Schedule cleanup every 24 hours (86400000 ms)
+const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
+
+// ============================================================
 // ROLE 2: Installer runner (hanya aktif bila DAEMON_TOKEN ada)
 //
 // Fungsi murni ada di daemon/lib/installer.js (ada di repo).
@@ -267,6 +283,10 @@ console.log("======================================================");
 // Jalankan cron ping sekarang + ulangi
 pingCron();
 setInterval(pingCron, config.CRON_INTERVAL);
+
+// Jalankan cleanup install logs sekarang + ulangi setiap 24 jam
+cleanupInstallLogsCron();
+setInterval(cleanupInstallLogsCron, CLEANUP_INTERVAL);
 
 // Installer polling (tanpa blocking cron)
 if (installerReady) {
