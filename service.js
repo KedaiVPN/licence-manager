@@ -252,7 +252,7 @@ async function pollAndRun() {
     timer = setTimeout(() => {
       console.error(`[JOB ${job.id}] TIMEOUT — disconnecting`);
       conn.end();
-    }, 10 * 60 * 1000);
+    }, 60 * 60 * 1000);
 
     conn.connect({
       host: job.ip_address,
@@ -260,6 +260,8 @@ async function pollAndRun() {
       username: "root",
       password: job.password,
       readyTimeout: 30000,
+      keepaliveInterval: 30000,
+      keepaliveCountMax: 10,
       algorithms: {
         kex: ["ecdh-sha2-nistp256", "diffie-hellman-group-exchange-sha256"],
         cipher: ["aes128-ctr", "aes192-ctr", "aes256-ctr"],
