@@ -9,7 +9,6 @@ interface FormData {
   ip_address: string;
   client_name: string;
   expired_date: string;
-  label: string;
   domain: string;
 }
 
@@ -19,7 +18,6 @@ export default function RegisterLicensePage() {
     ip_address: "",
     client_name: "",
     expired_date: "",
-    label: "",
     domain: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -31,10 +29,13 @@ export default function RegisterLicensePage() {
     setError("");
 
     try {
-      const res = await fetch("/api/admin/licenses", {
+      const res = await fetch("/api/client/licenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          label: "tunneling",
+        }),
       });
 
       if (!res.ok) {
@@ -105,19 +106,6 @@ export default function RegisterLicensePage() {
                   setFormData({ ...formData, expired_date: e.target.value })
                 }
                 required
-                className="ui-input bg-[#0a0a0c] border-cyan-900"
-              />
-            </div>
-
-            <div>
-              <label className="ui-label block mb-2">Label</label>
-              <input
-                type="text"
-                value={formData.label}
-                onChange={(e) =>
-                  setFormData({ ...formData, label: e.target.value })
-                }
-                placeholder="e.g. TUNNELING, PROXY"
                 className="ui-input bg-[#0a0a0c] border-cyan-900"
               />
             </div>

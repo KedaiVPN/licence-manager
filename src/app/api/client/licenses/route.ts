@@ -41,11 +41,12 @@ export async function POST(request: Request) {
 
     const { ip_address, client_name, expired_date, label, domain } = await request.json();
 
-    if (!ip_address || !client_name || !expired_date || !label || !domain) {
+    if (!ip_address || !client_name || !expired_date || !domain) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (label !== "zivpn" && label !== "tunneling") {
+    const finalLabel = (label || "tunneling").toLowerCase();
+    if (finalLabel !== "zivpn" && finalLabel !== "tunneling") {
       return NextResponse.json({ error: "Invalid label" }, { status: 400 });
     }
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     await db.execute({
       sql: `INSERT INTO licenses (ip_address, client_name, expired_date, status, auth_key, tele_id, label, domain, is_monitoring_enabled)
             VALUES (?, ?, ?, 'active', '', ?, ?, ?, 0)`,
-      args: [ip_address, client_name, expired_date, user.tele_id, label, domain || null],
+      args: [ip_address, client_name, expired_date, user.tele_id, finalLabel, domain || null],
     });
 
     return NextResponse.json({ success: true, message: "License registered successfully" });
