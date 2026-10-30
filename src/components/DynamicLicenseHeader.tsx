@@ -20,10 +20,20 @@ export default function DynamicLicenseHeader({ showLogout = true }: DynamicLicen
   const isDashboard = pathname === "/dashboard";
 
   useEffect(() => {
-    // Check if user_session cookie exists
-    const cookies = document.cookie.split("; ");
-    const hasSession = cookies.some((cookie) => cookie.startsWith("user_session="));
-    setIsLoggedIn(hasSession);
+    // Check auth status via dedicated API (user_session is httpOnly, can't be read from document.cookie)
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/status");
+        if (res.ok) {
+          const data = await res.json();
+          setIsLoggedIn(data.isLoggedIn);
+        }
+      } catch (error) {
+        console.error("Auth status check failed:", error);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   // Close menu when clicking outside
