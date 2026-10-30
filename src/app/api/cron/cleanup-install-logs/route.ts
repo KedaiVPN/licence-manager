@@ -15,16 +15,14 @@ export async function GET(request: Request) {
     const t = wibDate.toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 
     // Find all install_jobs that finished more than 1 day ago and have logs
-    // Turso stores finished_at as Unix timestamp (INTEGER), NOT datetime string
-    const cutoff = Math.floor(Date.now() / 1000) - (24 * 60 * 60); // 1 day ago in Unix seconds
-
+    // Turso stores finished_at as TEXT in ISO datetime format via datetime('now')
     const checkResult = await db.execute({
       sql: `SELECT id, ip_address, client_name FROM install_jobs
             WHERE finished_at IS NOT NULL
-            AND finished_at < ?
+            AND datetime(finished_at) < datetime('now', '-1 day')
             AND log IS NOT NULL
             AND log != ''`,
-      args: [cutoff],
+      args: [],
     });
 
     const jobsToClean = checkResult.rows.length;
@@ -35,8 +33,8 @@ export async function GET(request: Request) {
         sql: `UPDATE install_jobs
               SET log = ''
               WHERE finished_at IS NOT NULL
-              AND finished_at < ?`,
-        args: [cutoff],
+              AND datetime(finished_at) < datetime('now', '-1 day')`,
+        args: [],
       });
 
       console.log(`[${t}] [CLEANUP] Cleared logs from ${jobsToClean} old install jobs`);
