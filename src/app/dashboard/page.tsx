@@ -293,7 +293,7 @@ export default function DashboardPage() {
                 Overview
               </div>
               {summaryGrid}
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => router.push("/register")}
                   className="bg-cyan-500 text-black px-4 py-2 text-xs uppercase tracking-widest font-bold hover:bg-cyan-400 transition-colors flex items-center gap-2"
