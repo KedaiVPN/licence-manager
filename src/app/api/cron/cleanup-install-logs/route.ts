@@ -14,38 +14,35 @@ export async function GET(request: Request) {
     const wibDate = new Date(nowStr);
     const t = wibDate.toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 
-    // Find all install_jobs that finished more than 1 day ago and have logs
+    // Find all install_jobs that finished more than 1 day ago
     // Turso stores finished_at as TEXT in ISO datetime format via datetime('now')
     const checkResult = await db.execute({
       sql: `SELECT id, ip_address, client_name FROM install_jobs
             WHERE finished_at IS NOT NULL
-            AND datetime(finished_at) < datetime('now', '-1 day')
-            AND log IS NOT NULL
-            AND log != ''`,
+            AND datetime(finished_at) < datetime('now', '-1 day')`,
       args: [],
     });
 
-    const jobsToClean = checkResult.rows.length;
+    const jobsToDelete = checkResult.rows.length;
 
-    if (jobsToClean > 0) {
-      // Clear logs for old finished jobs
+    if (jobsToDelete > 0) {
+      // Delete entire rows for old finished jobs
       await db.execute({
-        sql: `UPDATE install_jobs
-              SET log = ''
+        sql: `DELETE FROM install_jobs
               WHERE finished_at IS NOT NULL
               AND datetime(finished_at) < datetime('now', '-1 day')`,
         args: [],
       });
 
-      console.log(`[${t}] [CLEANUP] Cleared logs from ${jobsToClean} old install jobs`);
+      console.log(`[${t}] [CLEANUP] Deleted ${jobsToDelete} old install jobs`);
     } else {
-      console.log(`[${t}] [CLEANUP] No old logs to clean`);
+      console.log(`[${t}] [CLEANUP] No old install jobs to delete`);
     }
 
     return NextResponse.json({
       success: true,
-      cleaned: jobsToClean,
-      message: `Cleared logs from ${jobsToClean} install jobs older than 1 day`,
+      deleted: jobsToDelete,
+      message: `Deleted ${jobsToDelete} install jobs older than 1 day`,
     });
   } catch (error) {
     console.error("Cleanup Install Logs Error:", error);
