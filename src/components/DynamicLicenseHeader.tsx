@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2, LogIn, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Gauge, Home, Loader2, LogIn, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface DynamicLicenseHeaderProps {
@@ -11,10 +11,14 @@ interface DynamicLicenseHeaderProps {
 
 export default function DynamicLicenseHeader({ showLogout = true }: DynamicLicenseHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const isOnDashboard = pathname === "/dashboard";
+  const isOnHome = pathname === "/";
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -134,6 +138,30 @@ export default function DynamicLicenseHeader({ showLogout = true }: DynamicLicen
         }`}
       >
         <nav className="mx-auto max-w-6xl px-6 py-2" aria-label="Menu utama">
+          {/* Navigation items based on current page */}
+          {isOnDashboard && (
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className="flex min-h-[52px] items-center gap-3 border-b border-cyan-950/70 px-1 py-4 text-left text-sm uppercase tracking-widest text-cyan-400 transition-colors hover:bg-cyan-950/20 active:bg-cyan-950/40"
+            >
+              <Home className="h-5 w-5 shrink-0" />
+              <span>Home</span>
+            </Link>
+          )}
+
+          {isOnHome && (
+            <Link
+              href="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="flex min-h-[52px] items-center gap-3 border-b border-cyan-950/70 px-1 py-4 text-left text-sm uppercase tracking-widest text-cyan-400 transition-colors hover:bg-cyan-950/20 active:bg-cyan-950/40"
+            >
+              <Gauge className="h-5 w-5 shrink-0" />
+              <span>Dashboard</span>
+            </Link>
+          )}
+
+          {/* Auth items */}
           {isLoggedIn === null ? (
             <div className="flex min-h-[52px] items-center gap-3 border-b border-cyan-950/70 px-1 py-4 text-sm uppercase tracking-widest text-cyan-700">
               <Loader2 className="h-5 w-5 animate-spin" />
