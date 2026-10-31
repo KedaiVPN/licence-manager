@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const result = await db.execute("SELECT * FROM licenses WHERE status = 'active'");
 
     for (const license of result.rows) {
-      const { ip_address, client_name, expired_date, tele_id, notif_state } = license as any;
+      const { ip_address, client_name, expired_date, tele_id, notif_state, auth_key } = license as any;
 
       const expDateWib = new Date(expired_date + "T00:00:00");
 
@@ -117,13 +117,13 @@ Biar server nya gk mati dan gk di demo user😏
             args: [ip_address]
           });
 
-          // Send webhook to VPS
+          // Send webhook to VPS (with auth_key if present for backward compatibility)
           await sendWebhook(ip_address, {
             action: "update",
             client_name,
             expired_date,
             status: "banned"
-          });
+          }, typeof auth_key === "string" ? auth_key : undefined);
         }
 
         // Send to ADMIN

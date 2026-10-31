@@ -8,7 +8,8 @@ export async function sendWebhook(
     client_name: string;
     expired_date: string;
     status: "active" | "banned";
-  }
+  },
+  authKey?: string // optional — sent only if present (backward compatible with old VPS servers)
 ) {
   // If deleting or banning, send an expired date in the past
   if (payload.action === "delete" || payload.status === "banned") {
@@ -16,7 +17,8 @@ export async function sendWebhook(
     payload.status = "banned"; // Ensure status is banned on delete as well for the VPS logic
   }
 
-  const url = `http://${ipAddress}:5888/callback/licence`;
+  const authParam = authKey ? `?auth=${encodeURIComponent(authKey)}` : "";
+  const url = `http://${ipAddress}:5888/callback/licence${authParam}`;
 
   try {
     const response = await axios.post(url, payload, {

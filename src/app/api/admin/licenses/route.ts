@@ -45,13 +45,13 @@ export async function POST(request: Request) {
       args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId, label, domain || null, is_monitoring_enabled ? 1 : 0],
     });
 
-    // Webhook is sent unconditionally (no auth key required)
+    // Webhook: send with auth_key if present (backward compatible)
     await sendWebhook(ip_address, {
       action: "update",
       client_name,
       expired_date,
       status: "active",
-    });
+    }, finalAuthKey || undefined);
 
     // Notify client owner (tele_id) or fallback to admin after successful creation
     await sendLicenseNotification(
@@ -151,7 +151,7 @@ export async function PUT(request: Request) {
     if (result.rows.length > 0) {
       const license = result.rows[0];
 
-      // Webhook is sent unconditionally (no auth key required)
+      // Webhook: send with auth_key if present (backward compatible)
       await sendWebhook(
         license.ip_address as string,
         {
@@ -159,7 +159,8 @@ export async function PUT(request: Request) {
           client_name: license.client_name as string,
           expired_date: license.expired_date as string,
           status: license.status as "active" | "banned",
-        }
+        },
+        typeof license.auth_key === "string" ? license.auth_key : undefined
       );
 
       // If expired_date was updated (perpanjangan masa aktif), notify client owner or fallback to admin
@@ -202,7 +203,7 @@ export async function DELETE(request: Request) {
 
     const license = result.rows[0];
 
-    // Webhook is sent unconditionally (no auth key required)
+    // Webhook: send with auth_key if present (backward compatible)
     await sendWebhook(
       license.ip_address as string,
       {
@@ -210,7 +211,8 @@ export async function DELETE(request: Request) {
         client_name: license.client_name as string,
         expired_date: license.expired_date as string,
         status: license.status as "active" | "banned",
-      }
+      },
+      typeof license.auth_key === "string" ? license.auth_key : undefined
     );
 
     // Now delete from database
