@@ -47,11 +47,10 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const authKey = licenseResult.rows[0].auth_key as string;
     const payload = JSON.parse(payloadStr);
 
     // Attempt to resend the webhook
-    const success = await sendWebhook(ipAddress, authKey, payload);
+    const success = await sendWebhook(ipAddress, payload);
 
     if (success) {
       // If successful, delete the log

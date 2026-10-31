@@ -3,7 +3,6 @@ import { db } from "./db";
 
 export async function sendWebhook(
   ipAddress: string,
-  authKey: string,
   payload: {
     action: "update" | "delete";
     client_name: string;
@@ -17,7 +16,7 @@ export async function sendWebhook(
     payload.status = "banned"; // Ensure status is banned on delete as well for the VPS logic
   }
 
-  const url = `http://${ipAddress}:5888/callback/licence?auth=${authKey}`;
+  const url = `http://${ipAddress}:5888/callback/licence`;
 
   try {
     const response = await axios.post(url, payload, {

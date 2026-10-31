@@ -45,16 +45,13 @@ export async function POST(request: Request) {
       args: [ip_address, client_name, expired_date, "active", finalAuthKey, finalTeleId, label, domain || null, is_monitoring_enabled ? 1 : 0],
     });
 
-    // Only send webhook if auth_key exists (new VPS might not have it yet)
-    if (finalAuthKey) {
-      // Await webhook to prevent serverless termination
-      await sendWebhook(ip_address, finalAuthKey, {
-        action: "update",
-        client_name,
-        expired_date,
-        status: "active",
-      });
-    }
+    // Webhook is sent unconditionally (no auth key required)
+    await sendWebhook(ip_address, {
+      action: "update",
+      client_name,
+      expired_date,
+      status: "active",
+    });
 
     // Notify client owner (tele_id) or fallback to admin after successful creation
     await sendLicenseNotification(
@@ -154,20 +151,16 @@ export async function PUT(request: Request) {
     if (result.rows.length > 0) {
       const license = result.rows[0];
 
-      // Only send webhook if auth_key exists
-      if (license.auth_key) {
-        // Await webhook to prevent serverless termination
-        await sendWebhook(
-          license.ip_address as string,
-          license.auth_key as string,
-          {
-            action: "update",
-            client_name: license.client_name as string,
-            expired_date: license.expired_date as string,
-            status: license.status as "active" | "banned",
-          }
-        );
-      }
+      // Webhook is sent unconditionally (no auth key required)
+      await sendWebhook(
+        license.ip_address as string,
+        {
+          action: "update",
+          client_name: license.client_name as string,
+          expired_date: license.expired_date as string,
+          status: license.status as "active" | "banned",
+        }
+      );
 
       // If expired_date was updated (perpanjangan masa aktif), notify client owner or fallback to admin
       if (expired_date !== undefined) {
@@ -197,7 +190,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "IP address is required" }, { status: 400 });
     }
 
-    // Fetch before deleting to get auth_key and details for webhook
+    // Fetch details before deleting for the webhook payload
     const result = await db.execute({
       sql: "SELECT * FROM licenses WHERE ip_address = ?",
       args: [ip_address],
@@ -209,20 +202,16 @@ export async function DELETE(request: Request) {
 
     const license = result.rows[0];
 
-    // Only send webhook if auth_key exists
-    if (license.auth_key) {
-      // Await webhook to prevent serverless termination (it will send expired_date in the past)
-      await sendWebhook(
-        license.ip_address as string,
-        license.auth_key as string,
-        {
-          action: "delete",
-          client_name: license.client_name as string,
-          expired_date: license.expired_date as string,
-          status: license.status as "active" | "banned",
-        }
-      );
-    }
+    // Webhook is sent unconditionally (no auth key required)
+    await sendWebhook(
+      license.ip_address as string,
+      {
+        action: "delete",
+        client_name: license.client_name as string,
+        expired_date: license.expired_date as string,
+        status: license.status as "active" | "banned",
+      }
+    );
 
     // Now delete from database
     await db.execute({
