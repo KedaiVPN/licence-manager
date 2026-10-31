@@ -96,6 +96,7 @@ async function executeInstall(job, passwords) {
     const conn = new Client();
     let stdoutDone = false;
     let stderrDone = false;
+    let installationComplete = false;
 
     // Timeout 10 menit — VPS instalasi biasanya selesai < 8 menit.
     const timer = setTimeout(() => {
@@ -130,6 +131,12 @@ async function executeInstall(job, passwords) {
           const line = sanitizeLog(data.toString(), passwords);
           console.log(`[JOB ${id}] ${line}`);
           pushLog(id, line);
+
+          // Deteksi instalasi selesai dari log — cukup untuk trigger finish sebelum VPS reboot
+          if (line.includes("Instalasi otomatis selesai") || line.includes("Installation completed")) {
+            installationComplete = true;
+            console.log(`[JOB ${id}] Installation completed detected in log, will finish job on stream close or timeout`);
+          }
         });
 
         stream.stderr.on("data", (data) => {
@@ -142,9 +149,14 @@ async function executeInstall(job, passwords) {
           clearTimeout(timer);
           console.log(`[JOB ${id}] Stream closed, exit code: ${code}`);
 
+          // Jika log sudah menunjukkan instalasi selesai, anggap success meskipun SSH putus
+          if (installationComplete) {
+            console.log(`[JOB ${id}] Installation was marked complete in log; finishing as success`);
+            finishJob(id, "success", "Installation completed successfully.").then(resolve);
+          }
           // Exit 10 = needs_confirmation (guard existing install di setup.sh).
           // Non-zero lain = kegagalan nyata.
-          if (code === 10) {
+          else if (code === 10) {
             finishJob(id, "needs_confirmation",
               "Script sudah terpasang di VPS target; butuh FORCE_REINSTALL manual."
             ).then(resolve);
