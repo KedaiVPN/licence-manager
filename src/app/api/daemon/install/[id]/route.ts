@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendInstallNotification } from "@/lib/telegram";
 
 // Daemon-only: /api/daemon/install/[id]
 // POST  -> append log line { line }
@@ -62,6 +63,27 @@ export async function PATCH(
       sql: "UPDATE install_jobs SET status = ?, finished_at = datetime('now'), log = log || ? WHERE id = ?",
       args: [status, logSuffix, id],
     });
+
+    // Send install completion notification to user and admin
+    try {
+      const jobInfoRes = await db.execute({
+        sql: "SELECT client_name, ip_address, owner_tele_id FROM install_jobs WHERE id = ?",
+        args: [id],
+      });
+      if (jobInfoRes.rows.length > 0) {
+        const job = jobInfoRes.rows[0] as any;
+        const notifStatus = status === "success" ? "success" : "failed";
+        await sendInstallNotification(
+          job.client_name,
+          job.ip_address,
+          notifStatus,
+          job.owner_tele_id,
+          message
+        );
+      }
+    } catch (e) {
+      console.error("Failed to send install notification:", e);
+    }
 
     // If install succeeded, auto-enable monitoring for the license
     if (status === "success") {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-const BOT_API_KEY = process.env.BOT_API_KEY;
-const ADMIN_TELE_ID = process.env.ADMIN_TELE_ID || process.env["ADMIN_TELE-ID"];
+const BOT_API_KEY = process.env.BOT_API_KEY || process.env.BOT_TOKEN;
+const ADMIN_TELE_ID = process.env.ADMIN_TELE_ID || process.env["ADMIN_TELE-ID"] || process.env.ADMIN_CHAT_ID;
 
 export async function sendTelegramMessage(chatId: string | number, text: string): Promise<boolean> {
   if (!BOT_API_KEY || !chatId) return false;
@@ -63,5 +63,33 @@ export async function sendLicenseNotification(
   // Fallback ke admin jika tidak terkirim ke client
   if (!sent && ADMIN_TELE_ID) {
     await sendTelegramMessage(ADMIN_TELE_ID, message);
+  }
+}
+
+export async function sendInstallNotification(
+  clientName: string,
+  ipAddress: string,
+  status: "success" | "failed",
+  ownerTeleId: string | null,
+  message?: string
+): Promise<void> {
+  const statusText = status === "success" ? "SELESAI" : "GAGAL";
+  const statusEmoji = status === "success" ? "✅" : "❌";
+  const statusIndo = status === "success" ? "berhasil" : "gagal";
+
+  const text = message
+    ? `━━━━━━━━━━━━━━━━━━━━\n${statusEmoji} INSTALASI ${statusText} ${statusEmoji}\n━━━━━━━━━━━━━━━━━━━━\n» NAMA: <code>${clientName}</code>\n» IP      : <code>${ipAddress}</code>\n━━━━━━━━━━━━━━━━━━━━\n» PESAN   : Script instalasi ${statusIndo}\n» DETAIL  : ${message}\n━━━━━━━━━━━━━━━━━━━━`
+    : `━━━━━━━━━━━━━━━━━━━━\n${statusEmoji} INSTALASI ${statusText} ${statusEmoji}\n━━━━━━━━━━━━━━━━━━━━\n» NAMA: <code>${clientName}</code>\n» IP      : <code>${ipAddress}</code>\n━━━━━━━━━━━━━━━━━━━━\n» PESAN   : Script instalasi ${statusIndo}\n━━━━━━━━━━━━━━━━━━━━`;
+
+  // Prioritas: kirim ke owner (tele_id) dulu, jika kosong kirim ke admin
+  let sent = false;
+
+  if (ownerTeleId) {
+    sent = await sendTelegramMessage(ownerTeleId, text);
+  }
+
+  // Fallback ke admin jika tidak terkirim ke owner
+  if (!sent && ADMIN_TELE_ID) {
+    await sendTelegramMessage(ADMIN_TELE_ID, text);
   }
 }

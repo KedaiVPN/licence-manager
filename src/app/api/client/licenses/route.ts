@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyUserToken } from "@/lib/auth";
+import { sendLicenseNotification } from "@/lib/telegram";
 
 // Helper to get authenticated user from session cookie
 async function getAuthUser() {
@@ -66,6 +67,13 @@ export async function POST(request: Request) {
             VALUES (?, ?, ?, 'active', '', ?, ?, ?, 0)`,
       args: [ip_address, client_name, expired_date, user.tele_id, finalLabel, domain || null],
     });
+
+    // Notify user and admin via Telegram
+    try {
+      await sendLicenseNotification(client_name, ip_address, expired_date, user.tele_id, "create");
+    } catch (e) {
+      console.error("Failed to send license notification:", e);
+    }
 
     return NextResponse.json({ success: true, message: "License registered successfully" });
   } catch (error: any) {
